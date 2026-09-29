@@ -1,106 +1,212 @@
-import React from "react";
-import { useState } from "react";
+import React, { useState } from "react";
 import Editor from "@monaco-editor/react";
+import logo from "../assets/logo.png";
+import { Link } from "react-router-dom";
 
 const Compiler = () => {
-
     const [language, setLanguage] = useState("java");
 
+    const [code, setCode] = useState(`import java.util.*;
 
-  return (
-    <main className="h-screen overflow-hidden bg-zinc-950 text-white">
-      {/* Top Bar */}
-      <header className="flex h-[74px] items-center justify-between border-b border-zinc-800 px-7">
-        {/* Logo */}
-        <h1 className="text-2xl font-bold">
-          Code<span className="text-indigo-500">Pulse</span>
-        </h1>
-
-        {/* Controls */}
-        <div className="flex items-center gap-4">
-          <select onChange={(e) => setLanguage(e.target.value)} value={language} className="rounded-lg border border-zinc-800 bg-zinc-900 px-5 py-3 text-sm text-white outline-none transition focus:border-indigo-500">
-            <option>Java</option>
-            <option>C++</option>
-            <option>Python</option>
-            <option>JavaScript</option>
-          </select>
-
-          <button className="rounded-lg bg-indigo-600 px-6 py-3 text-sm font-semibold transition hover:bg-indigo-500">
-            Run Code
-          </button>
-        </div>
-      </header>
-
-      {/* Compiler Workspace */}
-      <div className="h-[calc(100vh-74px)] p-6">
-        <div className="grid h-full gap-5 lg:grid-cols-2">
-          {/* LEFT - CODE EDITOR */}
-          <section className="flex min-h-0 flex-col">
-            <div className="mb-3 flex items-center justify-between">
-              <h2 className="text-sm font-medium text-zinc-400">Code</h2>
-
-              <span className="text-xs text-zinc-600">Editor</span>
-            </div>
-
-            <div className="min-h-0 flex-1 overflow-hidden rounded-xl border border-zinc-800">
-              <Editor
-                height="100%"
-                language={language}
-                defaultValue={`public class Main {
+public class Main {
     public static void main(String[] args) {
-        System.out.println("Hello, CodePulse!");
+        Scanner sc = new Scanner(System.in);
+
+        int a = sc.nextInt();
+        int b = sc.nextInt();
+
+        System.out.println(a + b);
     }
-}`}
-                theme="vs-dark"
-                options={{
-                  fontSize: 14,
-                  minimap: { enabled: false },
-                  padding: {
-                    top: 16,
-                  },
-                  scrollBeyondLastLine: false,
-                  automaticLayout: true,
-                }}
-              />
+}`);
+
+    const [input, setInput] = useState("1\n2");
+    const [output, setOutput] = useState("");
+    const [loading, setLoading] = useState(false);
+
+    const runCode = async () => {
+        setLoading(true);
+        setOutput("Running...");
+
+        try {
+            const response = await fetch("http://localhost:5000/api/compile", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    language,
+                    code,
+                    input,
+                }),
+            });
+
+            const data = await response.json();
+
+            console.log("Backend response:", data);
+
+            setOutput(data.output || "No output");
+        } catch (error) {
+            console.error(error);
+
+            setOutput(
+                "Could not connect to the backend.\nMake sure the backend server is running."
+            );
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <main className="h-screen overflow-hidden bg-zinc-950 text-white">
+
+            {/* Top Bar */}
+            <header className="flex h-[74px] items-center justify-between border-b border-zinc-800 px-7">
+
+                {/* Logo */}
+                <Link
+                    to="/"
+                    className="flex items-center justify-center"
+                >
+                    <img
+                        src={logo}
+                        alt="CodePulse"
+                        className="h-7 w-12 object-contain"
+                    />
+
+                    <div className="text-xl font-bold text-white">
+                        Code<span className="text-orange-500">Pulse</span>
+                    </div>
+                </Link>
+
+                {/* Controls */}
+                <div className="flex items-center gap-4">
+
+                    <select
+                        value={language}
+                        onChange={(e) => setLanguage(e.target.value)}
+                        className="cursor-pointer rounded-lg border border-zinc-800 bg-zinc-900 px-5 py-3 text-sm text-white outline-none transition focus:border-orange-500"
+                    >
+                        <option value="java">Java</option>
+                        <option value="cpp">C++</option>
+                        <option value="python">Python</option>
+                        <option value="javascript">JavaScript</option>
+                    </select>
+
+                    <button
+                        onClick={runCode}
+                        disabled={loading}
+                        className="cursor-pointer rounded-lg bg-orange-500 px-6 py-3 text-sm font-semibold transition hover:bg-orange-400 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                        {loading ? "Running..." : "Run Code"}
+                    </button>
+
+                </div>
+            </header>
+
+            {/* Compiler Workspace */}
+            <div className="h-[calc(100vh-74px)] p-6">
+
+                <div className="grid h-full gap-5 lg:grid-cols-2">
+
+                    {/* LEFT - CODE */}
+                    <section className="flex min-h-0 flex-col">
+
+                        <div className="mb-3 flex items-center justify-between">
+                            <h2 className="text-sm font-medium text-zinc-400">
+                                Code
+                            </h2>
+
+                            <span className="text-xs text-zinc-600">
+                                Editor
+                            </span>
+                        </div>
+
+                        <div className="min-h-0 flex-1 overflow-hidden rounded-xl border border-zinc-800">
+
+                            <Editor
+                                height="100%"
+                                language={language === "cpp" ? "cpp" : language}
+                                value={code}
+                                onChange={(value) => setCode(value || "")}
+                                theme="vs-dark"
+                                options={{
+                                    fontSize: 14,
+                                    minimap: {
+                                        enabled: false,
+                                    },
+                                    padding: {
+                                        top: 16,
+                                    },
+                                    scrollBeyondLastLine: false,
+                                    automaticLayout: true,
+                                }}
+                            />
+
+                        </div>
+
+                    </section>
+
+                    {/* RIGHT SIDE */}
+                    <section className="grid min-h-0 grid-rows-2 gap-5">
+
+                        {/* INPUT */}
+                        <div className="flex min-h-0 flex-col">
+
+                            <div className="mb-3 flex items-center justify-between">
+                                <h2 className="text-sm font-medium text-zinc-400">
+                                    Input
+                                </h2>
+
+                                <span className="text-xs text-zinc-600">
+                                    stdin
+                                </span>
+                            </div>
+
+                            <textarea
+                                value={input}
+                                onChange={(e) => setInput(e.target.value)}
+                                className="min-h-0 flex-1 resize-none rounded-xl border border-zinc-800 bg-zinc-900/80 p-5 font-mono text-sm leading-6 text-zinc-200 outline-none transition placeholder:text-zinc-600 focus:border-orange-500"
+                                placeholder="Enter input..."
+                                spellCheck="false"
+                            />
+
+                        </div>
+
+                        {/* OUTPUT */}
+                        <div className="flex min-h-0 flex-col">
+
+                            <div className="mb-3 flex items-center justify-between">
+                                <h2 className="text-sm font-medium text-zinc-400">
+                                    Output
+                                </h2>
+
+                                <span className="text-xs text-zinc-600">
+                                    stdout
+                                </span>
+                            </div>
+
+                            <div className="min-h-0 flex-1 overflow-auto rounded-xl border border-zinc-800 bg-zinc-900/80 p-5 font-mono text-sm leading-6 text-zinc-300 whitespace-pre-wrap">
+
+                                {output ? (
+                                    output
+                                ) : (
+                                    <span className="text-zinc-600">
+                                        Output will appear here...
+                                    </span>
+                                )}
+
+                            </div>
+
+                        </div>
+
+                    </section>
+
+                </div>
+
             </div>
-          </section>
 
-          {/* RIGHT SIDE */}
-          <section className="grid min-h-0 grid-rows-2 gap-5">
-            {/* INPUT */}
-            <div className="flex min-h-0 flex-col">
-              <div className="mb-3 flex items-center justify-between">
-                <h2 className="text-sm font-medium text-zinc-400">Input</h2>
-
-                <span className="text-xs text-zinc-600">stdin</span>
-              </div>
-
-              <textarea
-                className="min-h-0 flex-1 resize-none rounded-xl border border-zinc-800 bg-zinc-900/80 p-5 font-mono text-sm leading-6 text-zinc-200 outline-none transition placeholder:text-zinc-600 focus:border-indigo-500"
-                placeholder="Enter input..."
-                spellCheck="false"
-              />
-            </div>
-
-            {/* OUTPUT */}
-            <div className="flex min-h-0 flex-col">
-              <div className="mb-3 flex items-center justify-between">
-                <h2 className="text-sm font-medium text-zinc-400">Output</h2>
-
-                <span className="text-xs text-zinc-600">stdout</span>
-              </div>
-
-              <div className="min-h-0 flex-1 overflow-auto rounded-xl border border-zinc-800 bg-zinc-900/80 p-5 font-mono text-sm leading-6 text-zinc-300">
-                <span className="text-zinc-600">
-                  Output will appear here...
-                </span>
-              </div>
-            </div>
-          </section>
-        </div>
-      </div>
-    </main>
-  );
+        </main>
+    );
 };
 
 export default Compiler;

@@ -6,31 +6,51 @@ import { Link } from "react-router-dom";
 const Home = () => {
   return (
     <div>
-        <Navbar />
-      <section className="min-h-screen flex flex-col items-center justify-center text-center bg-zinc-950 px-6">
-        <p className="mb-4 text-sm font-medium tracking-[0.25em] text-indigo-400">
-          ONLINE CODE COMPILER
-        </p>
+      <Navbar />
+      <section className="relative flex min-h-[calc(100vh-74px)] items-center justify-center overflow-hidden bg-[#09090b] px-6">
+        {/* Background glow */}
+        <div className="pointer-events-none absolute left-1/2 top-1/2 h-[500px] w-[700px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-orange-500/10 blur-[140px]" />
 
-        <h1 className="text-5xl font-bold tracking-tight text-white sm:text-6xl lg:text-7xl">
-          Write. Compile. <span className="text-indigo-500">Create.</span>
-        </h1>
+        {/* Hero content */}
+        <div className="relative z-10 mx-auto flex max-w-5xl flex-col items-center text-center">
 
-        <p className="mt-6 max-w-2xl text-base leading-7 text-zinc-400 sm:text-lg">
-          A simple and powerful online compiler for developers. Write code, run
-          it instantly, and see the results.
-        </p>
 
-        <Link to="/compiler" className="mt-8 rounded-lg bg-indigo-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-indigo-500 hover:shadow-lg hover:shadow-indigo-500/20 cursor-pointer">
-          Start Coding
-        </Link>
+          {/* Heading */}
+          <h1 className="max-w-4xl text-5xl font-bold leading-[1.05] tracking-tight text-white sm:text-6xl md:text-7xl">
+            Write code.
+            <br />
+            <span className="text-zinc-300">Compile instantly.</span>
+            <br />
+            <span className="text-orange-500">Build anything.</span>
+          </h1>
+
+          {/* Description */}
+          <p className="mt-7 max-w-2xl text-base leading-7 text-zinc-400 sm:text-lg">
+            A fast, simple, and powerful online compiler for developers. Write
+            your code, run it instantly, and get results without setting up a
+            local environment.
+          </p>
+
+          {/* Buttons */}
+          <div className="mt-9 flex flex-col items-center gap-3 sm:flex-row">
+            <Link
+              to="/compiler"
+              className="group rounded-lg bg-orange-500 px-7 py-3.5 text-sm font-semibold text-white shadow-lg shadow-orange-500/20 transition-all duration-200 hover:-translate-y-0.5 hover:bg-orange-600 hover:shadow-orange-500/30"
+            >
+              Start Coding
+              <span className="ml-2 transition-transform group-hover:translate-x-1">
+                →
+              </span>
+            </Link>
+          </div>
+        </div>
       </section>
 
       <section id="features" className="bg-zinc-950 px-6 py-24">
         <div className="mx-auto max-w-7xl">
           {/* Section Heading */}
           <div className="mx-auto max-w-2xl text-center">
-            <p className="text-sm font-medium tracking-[0.25em] text-indigo-400">
+            <p className="text-sm font-medium tracking-[0.25em] text-orange-300">
               FEATURES
             </p>
 
@@ -47,8 +67,8 @@ const Home = () => {
           {/* Feature Cards */}
           <div className="mt-14 grid gap-6 md:grid-cols-3">
             {/* Card 1 */}
-            <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-7 transition hover:-translate-y-1 hover:border-indigo-500/40">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-500/10 text-2xl">
+            <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-7 transition hover:-translate-y-1 hover:border-orange-500/40">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-orange-500/10 text-2xl">
                 ⚡
               </div>
 
@@ -63,8 +83,8 @@ const Home = () => {
             </div>
 
             {/* Card 2 */}
-            <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-7 transition hover:-translate-y-1 hover:border-indigo-500/40">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-500/10 text-2xl">
+            <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-7 transition hover:-translate-y-1 hover:border-orange-500/40">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-orange-500/10 text-2xl">
                 🔒
               </div>
 
@@ -79,8 +99,8 @@ const Home = () => {
             </div>
 
             {/* Card 3 */}
-            <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-7 transition hover:-translate-y-1 hover:border-indigo-500/40">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-500/10 text-2xl">
+            <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-7 transition hover:-translate-y-1 hover:border-orange-500/40">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-orange-500/10 text-2xl">
                 💻
               </div>
 
@@ -104,7 +124,7 @@ const Home = () => {
         <div className="mx-auto max-w-7xl">
           {/* Heading */}
           <div className="mx-auto max-w-2xl text-center">
-            <p className="text-sm font-medium tracking-[0.25em] text-indigo-400">
+            <p className="text-sm font-medium tracking-[0.25em] text-orange-300">
               HOW IT WORKS
             </p>
 
@@ -121,7 +141,7 @@ const Home = () => {
           <div className="mt-16 grid gap-10 md:grid-cols-3">
             {/* Step 1 */}
             <div className="text-center">
-              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full border border-indigo-500/30 bg-indigo-500/10 text-lg font-bold text-indigo-400">
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full border border-orange-500/30 bg-orange-500/10 text-lg font-bold text-orange-400">
                 01
               </div>
 
@@ -137,7 +157,7 @@ const Home = () => {
 
             {/* Step 2 */}
             <div className="text-center">
-              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full border border-indigo-500/30 bg-indigo-500/10 text-lg font-bold text-indigo-400">
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full border border-orange-500/30 bg-orange-500/10 text-lg font-bold text-orange-400">
                 02
               </div>
 
@@ -152,7 +172,7 @@ const Home = () => {
 
             {/* Step 3 */}
             <div className="text-center">
-              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full border border-indigo-500/30 bg-indigo-500/10 text-lg font-bold text-indigo-400">
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full border border-orange-500/30 bg-orange-500/10 text-lg font-bold text-orange-400">
                 03
               </div>
 
@@ -176,7 +196,7 @@ const Home = () => {
         <div className="mx-auto max-w-7xl">
           {/* Heading */}
           <div className="mx-auto max-w-2xl text-center">
-            <p className="text-sm font-medium tracking-[0.25em] text-indigo-400">
+            <p className="text-sm font-medium tracking-[0.25em] text-orange-300">
               LANGUAGES
             </p>
 
@@ -193,7 +213,7 @@ const Home = () => {
           {/* Languages */}
           <div className="mx-auto mt-14 grid max-w-4xl grid-cols-2 gap-4 sm:grid-cols-4">
             {/* Java */}
-            <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 px-6 py-8 text-center transition hover:-translate-y-1 hover:border-indigo-500/40">
+            <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 px-6 py-8 text-center transition hover:-translate-y-1 hover:border-orange-500/40">
               <div className="text-3xl">☕</div>
 
               <h3 className="mt-4 font-semibold text-white">Java</h3>
@@ -202,7 +222,7 @@ const Home = () => {
             </div>
 
             {/* C++ */}
-            <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 px-6 py-8 text-center transition hover:-translate-y-1 hover:border-indigo-500/40">
+            <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 px-6 py-8 text-center transition hover:-translate-y-1 hover:border-orange-500/40">
               <div className="text-3xl">⚙️</div>
 
               <h3 className="mt-4 font-semibold text-white">C++</h3>
@@ -211,7 +231,7 @@ const Home = () => {
             </div>
 
             {/* Python */}
-            <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 px-6 py-8 text-center transition hover:-translate-y-1 hover:border-indigo-500/40">
+            <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 px-6 py-8 text-center transition hover:-translate-y-1 hover:border-orange-500/40">
               <div className="text-3xl">🐍</div>
 
               <h3 className="mt-4 font-semibold text-white">Python</h3>
@@ -220,7 +240,7 @@ const Home = () => {
             </div>
 
             {/* JavaScript */}
-            <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 px-6 py-8 text-center transition hover:-translate-y-1 hover:border-indigo-500/40">
+            <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 px-6 py-8 text-center transition hover:-translate-y-1 hover:border-orange-500/40">
               <div className="text-3xl">JS</div>
 
               <h3 className="mt-4 font-semibold text-white">JavaScript</h3>
