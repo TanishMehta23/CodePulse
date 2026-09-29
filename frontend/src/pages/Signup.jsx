@@ -68,7 +68,7 @@ const Signup = () => {
 
           <button
             type="submit"
-            className="w-full rounded-lg bg-indigo-600 py-3 text-sm font-semibold text-white transition hover:bg-indigo-500"
+            className="w-full rounded-lg bg-orange-500 py-3 text-sm font-semibold text-white transition hover:bg-orange-400 cursor-pointer"
           >
             Create Account
           </button>
@@ -79,7 +79,7 @@ const Signup = () => {
           Already have an account?{" "}
           <Link
             to="/login"
-            className="font-medium text-indigo-400 hover:text-indigo-300"
+            className="font-medium text-orange-400 hover:text-orange-300"
           >
             Login
           </Link>

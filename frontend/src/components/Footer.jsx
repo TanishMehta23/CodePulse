@@ -8,7 +8,7 @@ const Footer = () => {
         {/* Brand */}
         <div>
           <h2 className="text-lg font-bold text-white">
-            Code<span className="text-orange  -500">Pulse</span>
+            Code<span className="text-orange-500">Pulse</span>
           </h2>
 
           <p className="mt-2 text-sm text-zinc-500">

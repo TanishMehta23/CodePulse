@@ -59,47 +59,49 @@ public class Main {
     return (
         <main className="h-screen overflow-hidden bg-zinc-950 text-white">
 
-            {/* Top Bar */}
-            <header className="flex h-[74px] items-center justify-between border-b border-zinc-800 px-7">
+            {/* Top Bar / Navbar */}
+            <header className="sticky top-0 z-50 border-b border-zinc-800/80 bg-[#09090b]/95 backdrop-blur-md">
+                <div className="mx-auto flex h-[74px] w-full items-center justify-between px-7">
 
-                {/* Logo */}
-                <Link
-                    to="/"
-                    className="flex items-center justify-center"
-                >
-                    <img
-                        src={logo}
-                        alt="CodePulse"
-                        className="h-7 w-12 object-contain"
-                    />
+                    {/* Logo */}
+                    <Link
+                        to="/"
+                        className="flex items-center gap-3 transition-opacity hover:opacity-90"
+                    >
+                        <img
+                            src={logo}
+                            alt="CodePulse"
+                            className="h-9 w-9 object-contain"
+                        />
 
-                    <div className="text-xl font-bold text-white">
-                        Code<span className="text-orange-500">Pulse</span>
+                        <span className="text-[25px] font-bold tracking-tight text-white">
+                            Code<span className="text-orange-500">Pulse</span>
+                        </span>
+                    </Link>
+
+                    {/* Controls */}
+                    <div className="flex items-center gap-4">
+
+                        <select
+                            value={language}
+                            onChange={(e) => setLanguage(e.target.value)}
+                            className="cursor-pointer rounded-lg border border-zinc-800 bg-zinc-900 px-4 py-2.5 text-sm text-white outline-none transition focus:border-orange-500 hover:border-zinc-700"
+                        >
+                            <option value="java">Java</option>
+                            <option value="cpp">C++</option>
+                            <option value="python">Python</option>
+                            <option value="javascript">JavaScript</option>
+                        </select>
+
+                        <button
+                            onClick={runCode}
+                            disabled={loading}
+                            className="cursor-pointer rounded-lg bg-orange-500 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-orange-500/10 transition-all hover:bg-orange-600 hover:shadow-orange-500/20 disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                            {loading ? "Running..." : "Run Code"}
+                        </button>
+
                     </div>
-                </Link>
-
-                {/* Controls */}
-                <div className="flex items-center gap-4">
-
-                    <select
-                        value={language}
-                        onChange={(e) => setLanguage(e.target.value)}
-                        className="cursor-pointer rounded-lg border border-zinc-800 bg-zinc-900 px-5 py-3 text-sm text-white outline-none transition focus:border-orange-500"
-                    >
-                        <option value="java">Java</option>
-                        <option value="cpp">C++</option>
-                        <option value="python">Python</option>
-                        <option value="javascript">JavaScript</option>
-                    </select>
-
-                    <button
-                        onClick={runCode}
-                        disabled={loading}
-                        className="cursor-pointer rounded-lg bg-orange-500 px-6 py-3 text-sm font-semibold transition hover:bg-orange-400 disabled:cursor-not-allowed disabled:opacity-60"
-                    >
-                        {loading ? "Running..." : "Run Code"}
-                    </button>
-
                 </div>
             </header>
 

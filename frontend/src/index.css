@@ -29,9 +29,5 @@ body {
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #6366f1;
-}
-
-html {
-  scroll-behavior: smooth;
+  background: #f97316;
 }

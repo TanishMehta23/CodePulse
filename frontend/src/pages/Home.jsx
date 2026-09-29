@@ -19,9 +19,7 @@ const Home = () => {
           <h1 className="max-w-4xl text-5xl font-bold leading-[1.05] tracking-tight text-white sm:text-6xl md:text-7xl">
             Write code.
             <br />
-            <span className="text-zinc-300">Compile instantly.</span>
-            <br />
-            <span className="text-orange-500">Build anything.</span>
+            <span className="text-orange-500">Compile Instantly.</span>
           </h1>
 
           {/* Description */}
