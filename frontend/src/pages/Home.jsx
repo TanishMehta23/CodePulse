@@ -2,6 +2,7 @@ import React from "react";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { Link } from "react-router-dom";
+import { Zap, ShieldCheck, Code2 } from "lucide-react";
 
 const Home = () => {
   return (
@@ -9,7 +10,7 @@ const Home = () => {
       <Navbar />
       <section className="relative flex min-h-[calc(100vh-74px)] items-center justify-center overflow-hidden bg-[#09090b] px-6">
         {/* Background glow */}
-        <div className="pointer-events-none absolute left-1/2 top-1/2 h-[500px] w-[700px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-orange-500/10 blur-[140px]" />
+        <div className="pointer-events-none absolute left-1/2 top-1/2" />
 
         {/* Hero content */}
         <div className="relative z-10 mx-auto flex max-w-5xl flex-col items-center text-center">
@@ -66,9 +67,7 @@ const Home = () => {
           <div className="mt-14 grid gap-6 md:grid-cols-3">
             {/* Card 1 */}
             <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-7 transition hover:-translate-y-1 hover:border-orange-500/40">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-orange-500/10 text-2xl">
-                ⚡
-              </div>
+              <Zap className="h-7 w-7 text-orange-500" strokeWidth={2} />
 
               <h3 className="mt-6 text-lg font-semibold text-white">
                 Instant Execution
@@ -82,9 +81,7 @@ const Home = () => {
 
             {/* Card 2 */}
             <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-7 transition hover:-translate-y-1 hover:border-orange-500/40">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-orange-500/10 text-2xl">
-                🔒
-              </div>
+              <ShieldCheck className="h-7 w-7 text-orange-500" strokeWidth={2} />
 
               <h3 className="mt-6 text-lg font-semibold text-white">
                 Secure Execution
@@ -98,9 +95,7 @@ const Home = () => {
 
             {/* Card 3 */}
             <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-7 transition hover:-translate-y-1 hover:border-orange-500/40">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-orange-500/10 text-2xl">
-                💻
-              </div>
+              <Code2 className="h-7 w-7 text-orange-500" strokeWidth={2} />
 
               <h3 className="mt-6 text-lg font-semibold text-white">
                 Multiple Languages
