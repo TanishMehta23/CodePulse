@@ -1,8 +1,12 @@
 import React from "react";
+import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
+import { Link } from "react-router-dom";
 
 const Home = () => {
   return (
     <div>
+        <Navbar />
       <section className="min-h-screen flex flex-col items-center justify-center text-center bg-zinc-950 px-6">
         <p className="mb-4 text-sm font-medium tracking-[0.25em] text-indigo-400">
           ONLINE CODE COMPILER
@@ -17,9 +21,9 @@ const Home = () => {
           it instantly, and see the results.
         </p>
 
-        <button className="mt-8 rounded-lg bg-indigo-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-indigo-500 hover:shadow-lg hover:shadow-indigo-500/20 cursor-pointer">
+        <Link to="/compiler" className="mt-8 rounded-lg bg-indigo-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-indigo-500 hover:shadow-lg hover:shadow-indigo-500/20 cursor-pointer">
           Start Coding
-        </button>
+        </Link>
       </section>
 
       <section id="features" className="bg-zinc-950 px-6 py-24">
@@ -226,6 +230,7 @@ const Home = () => {
           </div>
         </div>
       </section>
+      <Footer />
     </div>
   );
 };
