@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import Navbar from "../components/Navbar";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -61,22 +62,25 @@ const Login = () => {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-950 px-6">
-      <div className="w-full max-w-md">
-        <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold text-white">
-            Welcome back
-          </h1>
+    <div className="min-h-screen bg-zinc-50 transition-colors duration-300 dark:bg-zinc-950">
+      <Navbar />
 
-          <p className="mt-2 text-sm text-zinc-400">
-            Login to continue to CodePulse
-          </p>
-        </div>
+      <div className="flex min-h-[calc(100vh-74px)] items-center justify-center px-6 py-12">
+        <div className="w-full max-w-md rounded-2xl border border-zinc-200 bg-white p-8 shadow-xl dark:border-zinc-800 dark:bg-zinc-900/50">
+          <div className="mb-8 text-center">
+            <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">
+              Welcome back
+            </h1>
+
+            <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
+              Login to continue to CodePulse
+            </p>
+          </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
           {/* EMAIL */}
           <div>
-            <label className="mb-2 block text-sm font-medium text-zinc-300">
+            <label className="mb-2 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
               Email
             </label>
 
@@ -87,13 +91,13 @@ const Login = () => {
               onChange={handleChange}
               placeholder="you@example.com"
               required
-              className="w-full rounded-lg border border-zinc-800 bg-zinc-900 px-4 py-3 text-sm text-white outline-none transition placeholder:text-zinc-600 focus:border-orange-500"
+              className="w-full rounded-lg border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-900 outline-none transition placeholder:text-zinc-400 focus:border-orange-500 dark:border-zinc-800 dark:bg-zinc-900 dark:text-white dark:placeholder:text-zinc-600"
             />
           </div>
 
           {/* PASSWORD */}
           <div>
-            <label className="mb-2 block text-sm font-medium text-zinc-300">
+            <label className="mb-2 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
               Password
             </label>
 
@@ -104,13 +108,13 @@ const Login = () => {
               onChange={handleChange}
               placeholder="••••••••"
               required
-              className="w-full rounded-lg border border-zinc-800 bg-zinc-900 px-4 py-3 text-sm text-white outline-none transition placeholder:text-zinc-600 focus:border-orange-500"
+              className="w-full rounded-lg border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-900 outline-none transition placeholder:text-zinc-400 focus:border-orange-500 dark:border-zinc-800 dark:bg-zinc-900 dark:text-white dark:placeholder:text-zinc-600"
             />
           </div>
 
           {/* ERROR */}
           {error && (
-            <div className="rounded-lg border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">
+            <div className="rounded-lg border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-500 dark:text-red-400">
               {error}
             </div>
           )}
@@ -119,21 +123,22 @@ const Login = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full cursor-pointer rounded-lg bg-orange-500 py-3 text-sm font-semibold text-white transition hover:bg-orange-400 disabled:cursor-not-allowed disabled:opacity-60"
+            className="w-full cursor-pointer rounded-lg bg-orange-500 py-3 text-sm font-semibold text-white shadow-lg shadow-orange-500/20 transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {loading ? "Logging in..." : "Login"}
           </button>
         </form>
 
-        <p className="mt-6 text-center text-sm text-zinc-500">
-          Don't have an account?{" "}
-          <Link
-            to="/signup"
-            className="font-medium text-orange-400 hover:text-orange-300"
-          >
-            Sign up
-          </Link>
-        </p>
+          <p className="mt-6 text-center text-sm text-zinc-500 dark:text-zinc-400">
+            Don't have an account?{" "}
+            <Link
+              to="/signup"
+              className="font-medium text-orange-500 hover:text-orange-600 dark:text-orange-400 dark:hover:text-orange-300"
+            >
+              Sign up
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   );
