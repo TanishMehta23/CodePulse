@@ -93,7 +93,10 @@ router.post("/", authMiddleware, async (req, res) => {
             (compileError, stdout, stderr) => {
                 if (compileError) {
                     const output =
-                        stderr || compileError.message || "Compilation failed.";
+                        (stderr && stderr.trim()) ||
+                        (stdout && stdout.trim()) ||
+                        compileError.message ||
+                        "Compilation failed.";
 
                     console.log("JAVA COMPILATION ERROR:");
                     console.log(output);
