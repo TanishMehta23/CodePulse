@@ -78,115 +78,85 @@ router.post("/", authMiddleware, async (req, res) => {
 
     const selectedLanguage = language.toLowerCase();
 
+    // Create a unique folder for each execution to prevent collisions/permission locks
+    const execId = `run_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+    const runDir = path.join(tempDir, execId);
+    fs.mkdirSync(runDir, { recursive: true });
+
+    const runOptions = {
+        timeout: 8000,
+        maxBuffer: 2 * 1024 * 1024,
+        cwd: runDir,
+    };
+
+    const cleanup = () => {
+        try {
+            fs.rmSync(runDir, { recursive: true, force: true });
+        } catch (e) {
+            // ignore cleanup errors
+        }
+    };
+
+    // Helper to send response and cleanup
+    const finish = ({ output, type, status }) => {
+        cleanup();
+        saveHistory({
+            userId,
+            language,
+            code,
+            input,
+            output,
+            status,
+        });
+        return res.json({ output, type });
+    };
+
     // =====================================================
     // JAVA
     // =====================================================
-
     if (selectedLanguage === "java") {
-        const javaFile = path.join(tempDir, "Main.java");
-
+        const javaFile = path.join(runDir, "Main.java");
         fs.writeFileSync(javaFile, code, "utf-8");
 
-        const compileOpts = { ...EXEC_OPTIONS, cwd: tempDir };
+        exec("javac Main.java", runOptions, (compileErr, compStdout, compStderr) => {
+            if (compileErr) {
+                const compileOutput = (compStderr || compStdout || compileErr.message || "Compilation failed").trim();
+                return finish({
+                    output: compileOutput,
+                    type: "error",
+                    status: "error",
+                });
+            }
 
-        exec(
-            `javac Main.java`,
-            compileOpts,
-            (compileError, stdout, stderr) => {
-                if (compileError) {
-                    const output =
-                        (stderr && stderr.trim()) ||
-                        (stdout && stdout.trim()) ||
-                        compileError.message ||
-                        "Compilation failed.";
-
-                    console.log("JAVA COMPILATION ERROR:", output);
-
-                    saveHistory({
-                        userId,
-                        language,
-                        code,
-                        input,
-                        output,
+            const child = exec("java -Xmx256m Main", runOptions, (runErr, runStdout, runStderr) => {
+                if (runErr) {
+                    let runOutput;
+                    if (runErr.killed) {
+                        runOutput = "Execution timed out (Limit: 8s). Possible infinite loop.";
+                    } else if (runErr.code === "ERR_CHILD_PROCESS_STDIO_MAXBUFFER") {
+                        runOutput = "Output limit exceeded.";
+                    } else {
+                        runOutput = (runStderr || runStdout || runErr.message || "Runtime error.").trim();
+                    }
+                    return finish({
+                        output: runOutput,
+                        type: "error",
                         status: "error",
                     });
-
-                    return res.json({
-                        output,
-                        type: "error",
-                    });
                 }
 
-                console.log("Java compilation successful");
+                return finish({
+                    output: runStdout || "Program executed successfully with no output.",
+                    type: "success",
+                    status: "success",
+                });
+            });
 
-                const command = `java Main`;
-
-                const child = exec(
-                    command,
-                    compileOpts,
-                    (runError, stdout, stderr) => {
-                        if (runError) {
-                            let output;
-
-                            if (runError.killed) {
-                                output =
-                                    "Execution timed out. Your program may contain an infinite loop.";
-                            } else if (
-                                runError.code ===
-                                "ERR_CHILD_PROCESS_STDIO_MAXBUFFER"
-                            ) {
-                                output =
-                                    "Output limit exceeded. Your program produced too much output.";
-                            } else {
-                                output =
-                                    (stderr && stderr.trim()) ||
-                                    (stdout && stdout.trim()) ||
-                                    runError.message ||
-                                    "Runtime error.";
-                            }
-
-                            console.log("JAVA RUNTIME ERROR:", output);
-
-                            saveHistory({
-                                userId,
-                                language,
-                                code,
-                                input,
-                                output,
-                                status: "error",
-                            });
-
-                            return res.json({
-                                output,
-                                type: "error",
-                            });
-                        }
-
-                        const output = stdout;
-
-                        saveHistory({
-                            userId,
-                            language,
-                            code,
-                            input,
-                            output,
-                            status: "success",
-                        });
-
-                        return res.json({
-                            output,
-                            type: "success",
-                        });
-                    }
-                );
-
-                if (input) {
-                    child.stdin.write(input);
-                }
-
-                child.stdin.end();
+            if (input) {
+                child.stdin.write(input);
             }
-        );
+            child.stdin.end();
+        });
 
         return;
     }
@@ -194,110 +164,52 @@ router.post("/", authMiddleware, async (req, res) => {
     // =====================================================
     // C++
     // =====================================================
-
     if (selectedLanguage === "cpp") {
         const isWin = process.platform === "win32";
-        const cppFile = path.join(tempDir, "Main.cpp");
-        const exeFile = path.join(tempDir, isWin ? "Main.exe" : "Main.out");
+        const cppFile = path.join(runDir, "Main.cpp");
+        const exeFile = isWin ? "Main.exe" : "./Main.out";
 
-        fs.writeFileSync(cppFile, code);
+        fs.writeFileSync(cppFile, code, "utf-8");
 
-        exec(
-            `g++ "${cppFile}" -o "${exeFile}"`,
-            EXEC_OPTIONS,
-            (compileError, stdout, stderr) => {
-                if (compileError) {
-                    const output =
-                        stderr || compileError.message || "Compilation failed.";
+        exec(`g++ Main.cpp -O2 -o ${isWin ? "Main.exe" : "Main.out"}`, runOptions, (compileErr, compStdout, compStderr) => {
+            if (compileErr) {
+                const compileOutput = (compStderr || compStdout || compileErr.message || "Compilation failed").trim();
+                return finish({
+                    output: compileOutput,
+                    type: "error",
+                    status: "error",
+                });
+            }
 
-                    console.log("C++ COMPILATION ERROR:");
-                    console.log(output);
-
-                    saveHistory({
-                        userId,
-                        language,
-                        code,
-                        input,
-                        output,
+            const child = exec(exeFile, runOptions, (runErr, runStdout, runStderr) => {
+                if (runErr) {
+                    let runOutput;
+                    if (runErr.killed) {
+                        runOutput = "Execution timed out (Limit: 8s).";
+                    } else if (runErr.code === "ERR_CHILD_PROCESS_STDIO_MAXBUFFER") {
+                        runOutput = "Output limit exceeded.";
+                    } else {
+                        runOutput = (runStderr || runStdout || runErr.message || "Runtime error.").trim();
+                    }
+                    return finish({
+                        output: runOutput,
+                        type: "error",
                         status: "error",
                     });
-
-                    return res.json({
-                        output,
-                        type: "error",
-                    });
                 }
 
-                console.log("C++ compilation successful");
+                return finish({
+                    output: runStdout || "Program executed successfully with no output.",
+                    type: "success",
+                    status: "success",
+                });
+            });
 
-                const command = isWin ? `"${exeFile}"` : `"${exeFile}"`;
-
-                const child = exec(
-                    command,
-                    EXEC_OPTIONS,
-                    (runError, stdout, stderr) => {
-                        if (runError) {
-                            let output;
-
-                            if (runError.killed) {
-                                output =
-                                    "Execution timed out. Your program may contain an infinite loop.";
-                            } else if (
-                                runError.code ===
-                                "ERR_CHILD_PROCESS_STDIO_MAXBUFFER"
-                            ) {
-                                output =
-                                    "Output limit exceeded. Your program produced too much output.";
-                            } else {
-                                output =
-                                    stderr ||
-                                    runError.message ||
-                                    "Runtime error.";
-                            }
-
-                            console.log("C++ RUNTIME ERROR:");
-                            console.log(output);
-
-                            saveHistory({
-                                userId,
-                                language,
-                                code,
-                                input,
-                                output,
-                                status: "error",
-                            });
-
-                            return res.json({
-                                output,
-                                type: "error",
-                            });
-                        }
-
-                        const output = stdout;
-
-                        saveHistory({
-                            userId,
-                            language,
-                            code,
-                            input,
-                            output,
-                            status: "success",
-                        });
-
-                        return res.json({
-                            output,
-                            type: "success",
-                        });
-                    }
-                );
-
-                if (input) {
-                    child.stdin.write(input);
-                }
-
-                child.stdin.end();
+            if (input) {
+                child.stdin.write(input);
             }
-        );
+            child.stdin.end();
+        });
 
         return;
     }
@@ -305,79 +217,38 @@ router.post("/", authMiddleware, async (req, res) => {
     // =====================================================
     // PYTHON
     // =====================================================
-
     if (selectedLanguage === "python") {
-        const pythonFile = path.join(tempDir, "Main.py");
+        const pythonFile = path.join(runDir, "Main.py");
+        fs.writeFileSync(pythonFile, code, "utf-8");
 
-        fs.writeFileSync(pythonFile, code);
-
-        // Try python3 on Linux or python on Windows
         const pythonCmd = process.platform === "win32" ? "python" : "python3";
-        const command = `${pythonCmd} "${pythonFile}"`;
-
-        const child = exec(
-            command,
-            EXEC_OPTIONS,
-            (runError, stdout, stderr) => {
-                if (runError) {
-                    let output;
-
-                    if (runError.killed) {
-                        output =
-                            "Execution timed out. Your program may contain an infinite loop.";
-                    } else if (
-                        runError.code ===
-                        "ERR_CHILD_PROCESS_STDIO_MAXBUFFER"
-                    ) {
-                        output =
-                            "Output limit exceeded. Your program produced too much output.";
-                    } else {
-                        output =
-                            stderr ||
-                            runError.message ||
-                            "Runtime error.";
-                    }
-
-                    console.log("PYTHON RUNTIME ERROR:");
-                    console.log(output);
-
-                    saveHistory({
-                        userId,
-                        language,
-                        code,
-                        input,
-                        output,
-                        status: "error",
-                    });
-
-                    return res.json({
-                        output,
-                        type: "error",
-                    });
+        const child = exec(`${pythonCmd} Main.py`, runOptions, (runErr, runStdout, runStderr) => {
+            if (runErr) {
+                let runOutput;
+                if (runErr.killed) {
+                    runOutput = "Execution timed out (Limit: 8s).";
+                } else if (runErr.code === "ERR_CHILD_PROCESS_STDIO_MAXBUFFER") {
+                    runOutput = "Output limit exceeded.";
+                } else {
+                    runOutput = (runStderr || runStdout || runErr.message || "Runtime error.").trim();
                 }
-
-                const output = stdout;
-
-                saveHistory({
-                    userId,
-                    language,
-                    code,
-                    input,
-                    output,
-                    status: "success",
-                });
-
-                return res.json({
-                    output,
-                    type: "success",
+                return finish({
+                    output: runOutput,
+                    type: "error",
+                    status: "error",
                 });
             }
-        );
+
+            return finish({
+                output: runStdout || "Program executed successfully with no output.",
+                type: "success",
+                status: "success",
+            });
+        });
 
         if (input) {
             child.stdin.write(input);
         }
-
         child.stdin.end();
 
         return;
@@ -386,77 +257,37 @@ router.post("/", authMiddleware, async (req, res) => {
     // =====================================================
     // JAVASCRIPT
     // =====================================================
-
     if (selectedLanguage === "javascript") {
-        const javascriptFile = path.join(tempDir, "Main.js");
+        const jsFile = path.join(runDir, "Main.js");
+        fs.writeFileSync(jsFile, code, "utf-8");
 
-        fs.writeFileSync(javascriptFile, code);
-
-        const command = `node "${javascriptFile}"`;
-
-        const child = exec(
-            command,
-            EXEC_OPTIONS,
-            (runError, stdout, stderr) => {
-                if (runError) {
-                    let output;
-
-                    if (runError.killed) {
-                        output =
-                            "Execution timed out. Your program may contain an infinite loop.";
-                    } else if (
-                        runError.code ===
-                        "ERR_CHILD_PROCESS_STDIO_MAXBUFFER"
-                    ) {
-                        output =
-                            "Output limit exceeded. Your program produced too much output.";
-                    } else {
-                        output =
-                            stderr ||
-                            runError.message ||
-                            "Runtime error.";
-                    }
-
-                    console.log("JAVASCRIPT RUNTIME ERROR:");
-                    console.log(output);
-
-                    saveHistory({
-                        userId,
-                        language,
-                        code,
-                        input,
-                        output,
-                        status: "error",
-                    });
-
-                    return res.json({
-                        output,
-                        type: "error",
-                    });
+        const child = exec(`node Main.js`, runOptions, (runErr, runStdout, runStderr) => {
+            if (runErr) {
+                let runOutput;
+                if (runErr.killed) {
+                    runOutput = "Execution timed out (Limit: 8s).";
+                } else if (runErr.code === "ERR_CHILD_PROCESS_STDIO_MAXBUFFER") {
+                    runOutput = "Output limit exceeded.";
+                } else {
+                    runOutput = (runStderr || runStdout || runErr.message || "Runtime error.").trim();
                 }
-
-                const output = stdout;
-
-                saveHistory({
-                    userId,
-                    language,
-                    code,
-                    input,
-                    output,
-                    status: "success",
-                });
-
-                return res.json({
-                    output,
-                    type: "success",
+                return finish({
+                    output: runOutput,
+                    type: "error",
+                    status: "error",
                 });
             }
-        );
+
+            return finish({
+                output: runStdout || "Program executed successfully with no output.",
+                type: "success",
+                status: "success",
+            });
+        });
 
         if (input) {
             child.stdin.write(input);
         }
-
         child.stdin.end();
 
         return;
