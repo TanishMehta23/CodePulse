@@ -12,6 +12,7 @@ import {
   Check,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import API_BASE_URL from "../config/api";
 
 const History = () => {
   const navigate = useNavigate();
@@ -54,7 +55,7 @@ const History = () => {
       setLoading(true);
       setError("");
 
-      const response = await fetch("http://localhost:5000/api/history", {
+      const response = await fetch(`${API_BASE_URL}/api/history`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -86,7 +87,7 @@ const History = () => {
 
   const deleteHistory = async (id) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/history/${id}`, {
+      const response = await fetch(`${API_BASE_URL}/api/history/${id}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -123,7 +124,7 @@ const History = () => {
       setClearing(true);
       setError("");
 
-      const response = await fetch("http://localhost:5000/api/history", {
+      const response = await fetch(`${API_BASE_URL}/api/history`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,

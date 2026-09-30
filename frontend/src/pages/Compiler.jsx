@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import { Star, Moon, Sun, Monitor } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
+import API_BASE_URL from "../config/api";
 
 const Compiler = () => {
   const { theme, changeTheme, isDark } = useTheme();
@@ -114,7 +115,7 @@ public class Main {
         headers.Authorization = `Bearer ${token}`;
       }
 
-      const response = await fetch("http://localhost:5000/api/compile", {
+      const response = await fetch(`${API_BASE_URL}/api/compile`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -153,7 +154,7 @@ public class Main {
 
       setOutput(
         "Could not connect to the backend.\n\n" +
-          "Make sure the backend server is running on port 5000.",
+          "Make sure the backend server is running.",
       );
     } finally {
       setLoading(false);
@@ -181,7 +182,7 @@ public class Main {
     }
 
     try {
-      const response = await fetch("http://localhost:5000/api/favorites", {
+      const response = await fetch(`${API_BASE_URL}/api/favorites`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -11,6 +11,7 @@ import {
   Copy,
   Check,
 } from "lucide-react";
+import API_BASE_URL from "../config/api";
 
 const Favorites = () => {
   const navigate = useNavigate();
@@ -34,7 +35,7 @@ const Favorites = () => {
 
     try {
       const response = await fetch(
-        "http://localhost:5000/api/favorites",
+        `${API_BASE_URL}/api/favorites`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -69,7 +70,7 @@ const Favorites = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:5000/api/favorites/${id}`,
+        `${API_BASE_URL}/api/favorites/${id}`,
         {
           method: "DELETE",
           headers: {
