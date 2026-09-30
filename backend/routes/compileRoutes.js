@@ -4,6 +4,9 @@ import path from "path";
 import { exec } from "child_process";
 import { fileURLToPath } from "url";
 
+import authMiddleware from "../middleware/authMiddleware.js";
+import prisma from "../prismaClient.js";
+
 const router = express.Router();
 
 const __filename = fileURLToPath(import.meta.url);
@@ -14,8 +17,51 @@ const EXEC_OPTIONS = {
     maxBuffer: 1024 * 1024, // 1 MB
 };
 
-router.post("/", (req, res) => {
+// =====================================================
+// SAVE RUN HISTORY
+// =====================================================
+
+const saveHistory = async ({
+    userId,
+    language,
+    code,
+    input,
+    output,
+    status,
+}) => {
+    try {
+        await prisma.runHistory.create({
+            data: {
+                userId,
+                language,
+                code,
+                input: input || "",
+                output: output || "",
+                status,
+            },
+        });
+
+        console.log("Run history saved");
+    } catch (error) {
+        console.error("HISTORY SAVE ERROR:", error);
+    }
+};
+
+// =====================================================
+// COMPILE / RUN
+// =====================================================
+
+router.post("/", authMiddleware, async (req, res) => {
     const { language, code, input = "" } = req.body;
+
+    const userId = req.userId;
+
+    if (!language) {
+        return res.status(400).json({
+            output: "Language is required",
+            type: "error",
+        });
+    }
 
     if (!code) {
         return res.status(400).json({
@@ -30,11 +76,13 @@ router.post("/", (req, res) => {
         fs.mkdirSync(tempDir, { recursive: true });
     }
 
-    // =========================
-    // JAVA
-    // =========================
+    const selectedLanguage = language.toLowerCase();
 
-    if (language.toLowerCase() === "java") {
+    // =====================================================
+    // JAVA
+    // =====================================================
+
+    if (selectedLanguage === "java") {
         const javaFile = path.join(tempDir, "Main.java");
 
         fs.writeFileSync(javaFile, code);
@@ -44,11 +92,23 @@ router.post("/", (req, res) => {
             EXEC_OPTIONS,
             (compileError, stdout, stderr) => {
                 if (compileError) {
+                    const output =
+                        stderr || compileError.message || "Compilation failed.";
+
                     console.log("JAVA COMPILATION ERROR:");
-                    console.log(stderr);
+                    console.log(output);
+
+                    saveHistory({
+                        userId,
+                        language,
+                        code,
+                        input,
+                        output,
+                        status: "error",
+                    });
 
                     return res.json({
-                        output: stderr || compileError.message,
+                        output,
                         type: "error",
                     });
                 }
@@ -62,33 +122,55 @@ router.post("/", (req, res) => {
                     EXEC_OPTIONS,
                     (runError, stdout, stderr) => {
                         if (runError) {
-                            console.log("JAVA RUNTIME ERROR:");
-                            console.log(stderr);
+                            let output;
 
                             if (runError.killed) {
-                                return res.json({
-                                    output:
-                                        "Execution timed out. Your program may contain an infinite loop.",
-                                    type: "error",
-                                });
+                                output =
+                                    "Execution timed out. Your program may contain an infinite loop.";
+                            } else if (
+                                runError.code ===
+                                "ERR_CHILD_PROCESS_STDIO_MAXBUFFER"
+                            ) {
+                                output =
+                                    "Output limit exceeded. Your program produced too much output.";
+                            } else {
+                                output =
+                                    stderr ||
+                                    runError.message ||
+                                    "Runtime error.";
                             }
 
-                            if (runError.code === "ERR_CHILD_PROCESS_STDIO_MAXBUFFER") {
-                                return res.json({
-                                    output:
-                                        "Output limit exceeded. Your program produced too much output.",
-                                    type: "error",
-                                });
-                            }
+                            console.log("JAVA RUNTIME ERROR:");
+                            console.log(output);
+
+                            saveHistory({
+                                userId,
+                                language,
+                                code,
+                                input,
+                                output,
+                                status: "error",
+                            });
 
                             return res.json({
-                                output: stderr || runError.message,
+                                output,
                                 type: "error",
                             });
                         }
 
+                        const output = stdout;
+
+                        saveHistory({
+                            userId,
+                            language,
+                            code,
+                            input,
+                            output,
+                            status: "success",
+                        });
+
                         return res.json({
-                            output: stdout,
+                            output,
                             type: "success",
                         });
                     }
@@ -105,11 +187,11 @@ router.post("/", (req, res) => {
         return;
     }
 
-    // =========================
+    // =====================================================
     // C++
-    // =========================
+    // =====================================================
 
-    if (language.toLowerCase() === "cpp") {
+    if (selectedLanguage === "cpp") {
         const cppFile = path.join(tempDir, "Main.cpp");
         const exeFile = path.join(tempDir, "Main.exe");
 
@@ -120,11 +202,23 @@ router.post("/", (req, res) => {
             EXEC_OPTIONS,
             (compileError, stdout, stderr) => {
                 if (compileError) {
+                    const output =
+                        stderr || compileError.message || "Compilation failed.";
+
                     console.log("C++ COMPILATION ERROR:");
-                    console.log(stderr);
+                    console.log(output);
+
+                    saveHistory({
+                        userId,
+                        language,
+                        code,
+                        input,
+                        output,
+                        status: "error",
+                    });
 
                     return res.json({
-                        output: stderr || compileError.message,
+                        output,
                         type: "error",
                     });
                 }
@@ -138,33 +232,55 @@ router.post("/", (req, res) => {
                     EXEC_OPTIONS,
                     (runError, stdout, stderr) => {
                         if (runError) {
-                            console.log("C++ RUNTIME ERROR:");
-                            console.log(stderr);
+                            let output;
 
                             if (runError.killed) {
-                                return res.json({
-                                    output:
-                                        "Execution timed out. Your program may contain an infinite loop.",
-                                    type: "error",
-                                });
+                                output =
+                                    "Execution timed out. Your program may contain an infinite loop.";
+                            } else if (
+                                runError.code ===
+                                "ERR_CHILD_PROCESS_STDIO_MAXBUFFER"
+                            ) {
+                                output =
+                                    "Output limit exceeded. Your program produced too much output.";
+                            } else {
+                                output =
+                                    stderr ||
+                                    runError.message ||
+                                    "Runtime error.";
                             }
 
-                            if (runError.code === "ERR_CHILD_PROCESS_STDIO_MAXBUFFER") {
-                                return res.json({
-                                    output:
-                                        "Output limit exceeded. Your program produced too much output.",
-                                    type: "error",
-                                });
-                            }
+                            console.log("C++ RUNTIME ERROR:");
+                            console.log(output);
+
+                            saveHistory({
+                                userId,
+                                language,
+                                code,
+                                input,
+                                output,
+                                status: "error",
+                            });
 
                             return res.json({
-                                output: stderr || runError.message,
+                                output,
                                 type: "error",
                             });
                         }
 
+                        const output = stdout;
+
+                        saveHistory({
+                            userId,
+                            language,
+                            code,
+                            input,
+                            output,
+                            status: "success",
+                        });
+
                         return res.json({
-                            output: stdout,
+                            output,
                             type: "success",
                         });
                     }
@@ -181,11 +297,11 @@ router.post("/", (req, res) => {
         return;
     }
 
-    // =========================
+    // =====================================================
     // PYTHON
-    // =========================
+    // =====================================================
 
-    if (language.toLowerCase() === "python") {
+    if (selectedLanguage === "python") {
         const pythonFile = path.join(tempDir, "Main.py");
 
         fs.writeFileSync(pythonFile, code);
@@ -197,33 +313,55 @@ router.post("/", (req, res) => {
             EXEC_OPTIONS,
             (runError, stdout, stderr) => {
                 if (runError) {
-                    console.log("PYTHON RUNTIME ERROR:");
-                    console.log(stderr);
+                    let output;
 
                     if (runError.killed) {
-                        return res.json({
-                            output:
-                                "Execution timed out. Your program may contain an infinite loop.",
-                            type: "error",
-                        });
+                        output =
+                            "Execution timed out. Your program may contain an infinite loop.";
+                    } else if (
+                        runError.code ===
+                        "ERR_CHILD_PROCESS_STDIO_MAXBUFFER"
+                    ) {
+                        output =
+                            "Output limit exceeded. Your program produced too much output.";
+                    } else {
+                        output =
+                            stderr ||
+                            runError.message ||
+                            "Runtime error.";
                     }
 
-                    if (runError.code === "ERR_CHILD_PROCESS_STDIO_MAXBUFFER") {
-                        return res.json({
-                            output:
-                                "Output limit exceeded. Your program produced too much output.",
-                            type: "error",
-                        });
-                    }
+                    console.log("PYTHON RUNTIME ERROR:");
+                    console.log(output);
+
+                    saveHistory({
+                        userId,
+                        language,
+                        code,
+                        input,
+                        output,
+                        status: "error",
+                    });
 
                     return res.json({
-                        output: stderr || runError.message,
+                        output,
                         type: "error",
                     });
                 }
 
+                const output = stdout;
+
+                saveHistory({
+                    userId,
+                    language,
+                    code,
+                    input,
+                    output,
+                    status: "success",
+                });
+
                 return res.json({
-                    output: stdout,
+                    output,
                     type: "success",
                 });
             }
@@ -238,11 +376,11 @@ router.post("/", (req, res) => {
         return;
     }
 
-    // =========================
+    // =====================================================
     // JAVASCRIPT
-    // =========================
+    // =====================================================
 
-    if (language.toLowerCase() === "javascript") {
+    if (selectedLanguage === "javascript") {
         const javascriptFile = path.join(tempDir, "Main.js");
 
         fs.writeFileSync(javascriptFile, code);
@@ -254,33 +392,55 @@ router.post("/", (req, res) => {
             EXEC_OPTIONS,
             (runError, stdout, stderr) => {
                 if (runError) {
-                    console.log("JAVASCRIPT RUNTIME ERROR:");
-                    console.log(stderr);
+                    let output;
 
                     if (runError.killed) {
-                        return res.json({
-                            output:
-                                "Execution timed out. Your program may contain an infinite loop.",
-                            type: "error",
-                        });
+                        output =
+                            "Execution timed out. Your program may contain an infinite loop.";
+                    } else if (
+                        runError.code ===
+                        "ERR_CHILD_PROCESS_STDIO_MAXBUFFER"
+                    ) {
+                        output =
+                            "Output limit exceeded. Your program produced too much output.";
+                    } else {
+                        output =
+                            stderr ||
+                            runError.message ||
+                            "Runtime error.";
                     }
 
-                    if (runError.code === "ERR_CHILD_PROCESS_STDIO_MAXBUFFER") {
-                        return res.json({
-                            output:
-                                "Output limit exceeded. Your program produced too much output.",
-                            type: "error",
-                        });
-                    }
+                    console.log("JAVASCRIPT RUNTIME ERROR:");
+                    console.log(output);
+
+                    saveHistory({
+                        userId,
+                        language,
+                        code,
+                        input,
+                        output,
+                        status: "error",
+                    });
 
                     return res.json({
-                        output: stderr || runError.message,
+                        output,
                         type: "error",
                     });
                 }
 
+                const output = stdout;
+
+                saveHistory({
+                    userId,
+                    language,
+                    code,
+                    input,
+                    output,
+                    status: "success",
+                });
+
                 return res.json({
-                    output: stdout,
+                    output,
                     type: "success",
                 });
             }
@@ -295,9 +455,9 @@ router.post("/", (req, res) => {
         return;
     }
 
-    // =========================
+    // =====================================================
     // UNSUPPORTED LANGUAGE
-    // =========================
+    // =====================================================
 
     return res.status(400).json({
         output: `${language} compiler is not supported yet.`,

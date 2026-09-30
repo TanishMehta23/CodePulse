@@ -1,11 +1,11 @@
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import Editor from "@monaco-editor/react";
 import logo from "../assets/logo.png";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
+import Sidebar from "../components/Sidebar";
+import { Star } from "lucide-react";
 
 const Compiler = () => {
-  const navigate = useNavigate();
-
   const boilerplates = {
     java: `import java.util.*;
 
@@ -59,24 +59,31 @@ public class Main {
   const [output, setOutput] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Sidebar
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  // Login state
-  const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem("token"));
-
-  // Keep latest runCode function available to Monaco
-  const runCodeRef = useRef(null);
-
   const runCode = async () => {
+    if (loading) return;
+
     setLoading(true);
     setOutput("Running...");
 
     try {
+      const token = localStorage.getItem("token");
+
+      const headers = {
+        "Content-Type": "application/json",
+      };
+
+      // Send JWT only when the user is logged in
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
+      }
+
       const response = await fetch("http://localhost:5000/api/compile", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
         body: JSON.stringify({
           language,
@@ -91,7 +98,11 @@ public class Main {
 
       if (!response.ok) {
         setOutput(
-          data.error || data.stderr || data.message || "Compilation failed.",
+          data.output ||
+            data.error ||
+            data.stderr ||
+            data.message ||
+            "Compilation failed.",
         );
         return;
       }
@@ -114,204 +125,72 @@ public class Main {
     }
   };
 
-  // Always keep the latest runCode function
-  runCodeRef.current = runCode;
+  // Ctrl + Enter / Cmd + Enter
+  const handleEditorMount = (editor, monaco) => {
+    editor.addAction({
+      id: "run-code",
+      label: "Run Code",
+      keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter],
+      run: () => {
+        runCode();
+      },
+    });
+  };
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
+  const addToFavorites = async () => {
+    const token = localStorage.getItem("token");
 
-    setIsLoggedIn(false);
-    setSidebarOpen(false);
+    if (!token) {
+      alert("Please login to save favorites.");
+      return;
+    }
 
-    navigate("/login");
+    try {
+      const response = await fetch("http://localhost:5000/api/favorites", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          language,
+          code,
+          input,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        alert(data.message || "Failed to add favorite");
+        return;
+      }
+
+      alert("Added to favorites ⭐");
+    } catch (error) {
+      console.error("Favorite error:", error);
+      alert("Could not connect to backend.");
+    }
   };
 
   return (
-    <main className="h-screen overflow-hidden bg-zinc-950 text-white">
-      {/* ================= SIDEBAR OVERLAY ================= */}
-      {sidebarOpen && (
-        <div
-          onClick={() => setSidebarOpen(false)}
-          className="fixed inset-0 z-[90] bg-black/60 backdrop-blur-sm"
-        />
-      )}
+    <main className="h-screen overflow-hidden bg-zinc-950 text-white dark:bg-zinc-950">
+      {/* Sidebar */}
+      <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
 
-      {/* ================= SIDEBAR ================= */}
-      <aside
-        className={`fixed left-0 top-0 z-[100] flex h-screen w-[375px] flex-col border-r border-zinc-800 bg-[#09090b] shadow-2xl transition-transform duration-300 ease-in-out ${
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
-      >
-        {/* Sidebar Header */}
-        <div className="flex h-[114px] items-center justify-between border-b border-zinc-800 px-7">
-          <Link
-            to="/"
-            onClick={() => setSidebarOpen(false)}
-            className="flex items-center gap-3"
-          >
-            <img
-              src={logo}
-              alt="CodePulse"
-              className="h-9 w-9 object-contain"
-            />
-
-            <span className="text-[25px] font-bold tracking-tight text-white">
-              Code<span className="text-orange-500">Pulse</span>
-            </span>
-          </Link>
-
-          <button
-            onClick={() => setSidebarOpen(false)}
-            className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg text-2xl text-zinc-500 transition hover:bg-zinc-900 hover:text-white"
-          >
-            ×
-          </button>
-        </div>
-
-        {/* ================= LOGGED IN ================= */}
-        {isLoggedIn ? (
-          <div className="flex flex-1 flex-col px-5 py-6">
-            {/* User Section */}
-            <div className="mb-6 rounded-xl border border-zinc-800 bg-zinc-900/60 p-4">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-orange-500/15 text-lg">
-                  👤
-                </div>
-
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-semibold text-white">
-                    {JSON.parse(localStorage.getItem("user") || "{}").name ||
-                      "CodePulse User"}
-                  </p>
-
-                  <p className="truncate text-xs text-zinc-500">
-                    {JSON.parse(localStorage.getItem("user") || "{}").email ||
-                      "Account"}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Menu */}
-            <nav className="space-y-2">
-              <button
-                onClick={() => setSidebarOpen(false)}
-                className="flex w-full cursor-pointer items-center gap-4 rounded-xl bg-orange-500/10 px-4 py-3 text-left text-sm font-medium text-orange-400 transition hover:bg-orange-500/15"
-              >
-                <span className="text-lg">⌨</span>
-                Compiler
-              </button>
-
-              <button className="flex w-full cursor-pointer items-center gap-4 rounded-xl px-4 py-3 text-left text-sm font-medium text-zinc-400 transition hover:bg-zinc-900 hover:text-white">
-                <span className="text-lg">↺</span>
-                Run History
-              </button>
-
-              <button className="flex w-full cursor-pointer items-center gap-4 rounded-xl px-4 py-3 text-left text-sm font-medium text-zinc-400 transition hover:bg-zinc-900 hover:text-white">
-                <span className="text-lg">★</span>
-                Favorites
-              </button>
-
-              <button className="flex w-full cursor-pointer items-center gap-4 rounded-xl px-4 py-3 text-left text-sm font-medium text-zinc-400 transition hover:bg-zinc-900 hover:text-white">
-                <span className="text-lg">◉</span>
-                Saved Code
-              </button>
-            </nav>
-
-            {/* Bottom */}
-            <div className="mt-auto border-t border-zinc-800 pt-5">
-              <button
-                onClick={handleLogout}
-                className="flex w-full cursor-pointer items-center gap-4 rounded-xl px-4 py-3 text-left text-sm font-medium text-red-400 transition hover:bg-red-500/10"
-              >
-                <span className="text-lg">↪</span>
-                Logout
-              </button>
-            </div>
-          </div>
-        ) : (
-          /* ================= NOT LOGGED IN ================= */
-          <div className="flex flex-1 flex-col px-5 py-6">
-            <div className="relative flex-1 overflow-hidden">
-              {/* Blur content */}
-              <div className="pointer-events-none select-none space-y-2 opacity-40 blur-[5px]">
-                <div className="flex items-center gap-4 rounded-xl bg-zinc-900 px-4 py-4">
-                  <span className="text-lg">⌨</span>
-                  <span>Compiler</span>
-                </div>
-
-                <div className="flex items-center gap-4 rounded-xl px-4 py-4">
-                  <span className="text-lg">↺</span>
-                  <span>Run History</span>
-                </div>
-
-                <div className="flex items-center gap-4 rounded-xl px-4 py-4">
-                  <span className="text-lg">★</span>
-                  <span>Favorites</span>
-                </div>
-
-                <div className="flex items-center gap-4 rounded-xl px-4 py-4">
-                  <span className="text-lg">◉</span>
-                  <span>Saved Code</span>
-                </div>
-              </div>
-
-              {/* Login Card */}
-              <div className="absolute inset-x-0 bottom-5 rounded-2xl border border-zinc-800 bg-zinc-900/95 p-6 text-center shadow-2xl">
-                <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full border border-orange-500/40 bg-orange-500/10 text-2xl">
-                  🔒
-                </div>
-
-                <h2 className="text-xl font-semibold text-white">
-                  Sign in to unlock
-                </h2>
-
-                <p className="mt-3 text-sm leading-6 text-zinc-500">
-                  Save your code, view run history and manage your favorites.
-                </p>
-
-                <Link
-                  to="/login"
-                  onClick={() => setSidebarOpen(false)}
-                  className="mt-6 block w-full rounded-xl bg-orange-500 py-3 text-sm font-semibold text-white transition hover:bg-orange-600"
-                >
-                  Sign In
-                </Link>
-
-                <Link
-                  to="/signup"
-                  onClick={() => setSidebarOpen(false)}
-                  className="mt-3 block w-full rounded-xl border border-zinc-700 bg-zinc-900 py-3 text-sm font-semibold text-zinc-300 transition hover:bg-zinc-800 hover:text-white"
-                >
-                  Create Account
-                </Link>
-
-                <p className="mt-5 text-xs leading-5 text-zinc-600">
-                  Your compiler remains free to use without an account.
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
-      </aside>
-
-      {/* ================= TOP BAR ================= */}
+      {/* Top Bar */}
       <header className="sticky top-0 z-50 border-b border-zinc-800/80 bg-[#09090b]/95 backdrop-blur-md">
         <div className="mx-auto flex h-[74px] w-full items-center justify-between px-7">
           {/* Left */}
-          <div className="flex items-center gap-6">
-            {/* Hamburger */}
+          <div className="flex items-center gap-4">
+            {/* Sidebar Button */}
             <button
               onClick={() => setSidebarOpen(true)}
+              className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border border-zinc-800 bg-zinc-900 text-lg text-zinc-300 transition hover:border-zinc-700 hover:bg-zinc-800 hover:text-white"
               aria-label="Open sidebar"
-              className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-lg border border-zinc-800 bg-zinc-900 text-zinc-300 transition hover:border-zinc-700 hover:bg-zinc-800 hover:text-white"
+              title="Open menu"
             >
-              <div className="space-y-1.5">
-                <span className="block h-0.5 w-5 bg-current" />
-                <span className="block h-0.5 w-5 bg-current" />
-                <span className="block h-0.5 w-5 bg-current" />
-              </div>
+              ☰
             </button>
 
             {/* Logo */}
@@ -331,8 +210,9 @@ public class Main {
             </Link>
           </div>
 
-          {/* Right Controls */}
+          {/* Controls */}
           <div className="flex items-center gap-4">
+            {/* Language */}
             <select
               value={language}
               onChange={(e) => {
@@ -351,7 +231,16 @@ public class Main {
               <option value="javascript">JavaScript</option>
             </select>
 
-            <div className="group relative">
+            {/* Run */}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={addToFavorites}
+                className="flex h-[42px] w-[42px] cursor-pointer items-center justify-center rounded-lg border border-zinc-800 bg-zinc-900 text-zinc-400 transition hover:border-orange-500/40 hover:bg-orange-500/10 hover:text-orange-400"
+                title="Add to favorites"
+              >
+                <Star size={18} />
+              </button>
+
               <button
                 onClick={runCode}
                 disabled={loading}
@@ -359,25 +248,12 @@ public class Main {
               >
                 {loading ? "Running..." : "Run Code"}
               </button>
-
-              {/* Shortcut tooltip */}
-              <div className="pointer-events-none absolute right-0 top-full z-50 mt-2 w-max rounded-md border border-zinc-700 bg-zinc-900 px-3 py-2 text-xs text-zinc-300 opacity-0 shadow-xl transition-opacity duration-200 group-hover:opacity-100">
-                Press{" "}
-                <kbd className="mx-1 rounded border border-zinc-600 bg-zinc-800 px-1.5 py-0.5 font-mono text-orange-400">
-                  Ctrl
-                </kbd>
-                +
-                <kbd className="ml-1 rounded border border-zinc-600 bg-zinc-800 px-1.5 py-0.5 font-mono text-orange-400">
-                  Enter
-                </kbd>{" "}
-                to run
-              </div>
             </div>
           </div>
         </div>
       </header>
 
-      {/* ================= COMPILER WORKSPACE ================= */}
+      {/* Workspace */}
       <div className="h-[calc(100vh-74px)] p-6">
         <div className="grid h-full gap-5 lg:grid-cols-2">
           {/* LEFT - CODE */}
@@ -385,7 +261,13 @@ public class Main {
             <div className="mb-3 flex items-center justify-between">
               <h2 className="text-sm font-medium text-zinc-400">Code</h2>
 
-              <span className="text-xs text-zinc-600">Ctrl + Enter to run</span>
+              <div className="flex items-center gap-3">
+                <span className="hidden text-[11px] text-zinc-600 sm:block">
+                  Ctrl + Enter to run
+                </span>
+
+                <span className="text-xs text-zinc-600">Editor</span>
+              </div>
             </div>
 
             <div className="min-h-0 flex-1 overflow-hidden rounded-xl border border-zinc-800">
@@ -394,25 +276,26 @@ public class Main {
                 language={language === "cpp" ? "cpp" : language}
                 value={code}
                 onChange={(value) => setCode(value || "")}
+                onMount={handleEditorMount}
                 theme="vs-dark"
-                onMount={(editor, monaco) => {
-                  editor.addCommand(
-                    monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter,
-                    () => {
-                      runCodeRef.current?.();
-                    },
-                  );
-                }}
                 options={{
                   fontSize: 14,
+
                   minimap: {
                     enabled: false,
                   },
+
                   padding: {
                     top: 16,
                   },
+
                   scrollBeyondLastLine: false,
+
                   automaticLayout: true,
+
+                  tabSize: 4,
+
+                  wordWrap: "on",
                 }}
               />
             </div>

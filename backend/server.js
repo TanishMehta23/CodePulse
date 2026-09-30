@@ -3,6 +3,8 @@ import cors from "cors";
 import dotenv from "dotenv";
 import compileRoutes from "./routes/compileRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
+import historyRoutes from "./routes/historyRoutes.js";
+import favoriteRoutes from "./routes/favoriteRoutes.js";
 
 dotenv.config();
 
@@ -13,6 +15,8 @@ app.use(express.json());
 
 app.use("/api/compile", compileRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/history", historyRoutes);
+app.use("/api/favorites", favoriteRoutes);
 
 app.get("/", (req, res) => {
     res.json({
