@@ -30,6 +30,28 @@ app.get("/", (req, res) => {
     });
 });
 
+app.get("/health", (req, res) => {
+    const { execSync } = require ? require("child_process") : {};
+    import("child_process").then(({ execSync }) => {
+        const checkCmd = (cmd) => {
+            try {
+                return execSync(cmd, { encoding: "utf-8" }).trim();
+            } catch (err) {
+                return "NOT INSTALLED / " + err.message;
+            }
+        };
+
+        res.json({
+            status: "OK",
+            environment: process.platform,
+            node: process.version,
+            javac: checkCmd("javac -version"),
+            gpp: checkCmd("g++ --version | head -n 1"),
+            python3: checkCmd("python3 --version")
+        });
+    });
+});
+
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
