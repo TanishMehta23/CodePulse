@@ -27,10 +27,6 @@ const Home = () => {
 
       {/* ================= HERO ================= */}
       <section className="relative flex min-h-[calc(100vh-74px)] items-center justify-center overflow-hidden bg-white px-6 transition-colors duration-300 dark:bg-[#09090b]">
-
-        {/* Background glow */}
-        <div className="pointer-events-none absolute left-1/2 top-1/2 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-orange-500/5 blur-3xl dark:bg-orange-500/10" />
-
         {/* Hero content */}
         <div className="relative z-10 mx-auto flex max-w-5xl flex-col items-center text-center">
 
