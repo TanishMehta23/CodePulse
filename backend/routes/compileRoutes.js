@@ -192,8 +192,9 @@ router.post("/", authMiddleware, async (req, res) => {
     // =====================================================
 
     if (selectedLanguage === "cpp") {
+        const isWin = process.platform === "win32";
         const cppFile = path.join(tempDir, "Main.cpp");
-        const exeFile = path.join(tempDir, "Main.exe");
+        const exeFile = path.join(tempDir, isWin ? "Main.exe" : "Main.out");
 
         fs.writeFileSync(cppFile, code);
 
@@ -225,7 +226,7 @@ router.post("/", authMiddleware, async (req, res) => {
 
                 console.log("C++ compilation successful");
 
-                const command = `"${exeFile}"`;
+                const command = isWin ? `"${exeFile}"` : `"${exeFile}"`;
 
                 const child = exec(
                     command,
@@ -306,7 +307,9 @@ router.post("/", authMiddleware, async (req, res) => {
 
         fs.writeFileSync(pythonFile, code);
 
-        const command = `python "${pythonFile}"`;
+        // Try python3 on Linux or python on Windows
+        const pythonCmd = process.platform === "win32" ? "python" : "python3";
+        const command = `${pythonCmd} "${pythonFile}"`;
 
         const child = exec(
             command,
