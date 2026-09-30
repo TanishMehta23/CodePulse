@@ -85,11 +85,13 @@ router.post("/", authMiddleware, async (req, res) => {
     if (selectedLanguage === "java") {
         const javaFile = path.join(tempDir, "Main.java");
 
-        fs.writeFileSync(javaFile, code);
+        fs.writeFileSync(javaFile, code, "utf-8");
+
+        const compileOpts = { ...EXEC_OPTIONS, cwd: tempDir };
 
         exec(
-            `javac -d "${tempDir}" "${javaFile}"`,
-            EXEC_OPTIONS,
+            `javac Main.java`,
+            compileOpts,
             (compileError, stdout, stderr) => {
                 if (compileError) {
                     const output =
@@ -117,11 +119,11 @@ router.post("/", authMiddleware, async (req, res) => {
 
                 console.log("Java compilation successful");
 
-                const command = `java -cp "${tempDir}" Main`;
+                const command = `java Main`;
 
                 const child = exec(
                     command,
-                    EXEC_OPTIONS,
+                    compileOpts,
                     (runError, stdout, stderr) => {
                         if (runError) {
                             let output;
@@ -137,13 +139,13 @@ router.post("/", authMiddleware, async (req, res) => {
                                     "Output limit exceeded. Your program produced too much output.";
                             } else {
                                 output =
-                                    stderr ||
+                                    (stderr && stderr.trim()) ||
+                                    (stdout && stdout.trim()) ||
                                     runError.message ||
                                     "Runtime error.";
                             }
 
-                            console.log("JAVA RUNTIME ERROR:");
-                            console.log(output);
+                            console.log("JAVA RUNTIME ERROR:", output);
 
                             saveHistory({
                                 userId,
