@@ -70,10 +70,10 @@ router.post("/", authMiddleware, async (req, res) => {
         });
     }
 
-    const tempDir = path.join(__dirname, "../temp");
+    const tempDir = path.join(process.cwd(), "temp");
 
     if (!fs.existsSync(tempDir)) {
-        fs.mkdirSync(tempDir, { recursive: true });
+        fs.mkdirSync(tempDir, { recursive: true, mode: 0o777 });
     }
 
     const selectedLanguage = language.toLowerCase();
@@ -88,7 +88,7 @@ router.post("/", authMiddleware, async (req, res) => {
         fs.writeFileSync(javaFile, code);
 
         exec(
-            `javac "${javaFile}"`,
+            `javac -d "${tempDir}" "${javaFile}"`,
             EXEC_OPTIONS,
             (compileError, stdout, stderr) => {
                 if (compileError) {
@@ -98,8 +98,7 @@ router.post("/", authMiddleware, async (req, res) => {
                         compileError.message ||
                         "Compilation failed.";
 
-                    console.log("JAVA COMPILATION ERROR:");
-                    console.log(output);
+                    console.log("JAVA COMPILATION ERROR:", output);
 
                     saveHistory({
                         userId,
