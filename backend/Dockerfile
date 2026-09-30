@@ -1,10 +1,10 @@
-FROM node:20-bullseye
+FROM node:20-bookworm-slim
 
 # Install OpenJDK (Java 17), GCC / G++ (C++), and Python 3
-RUN apt-get update && apt-get install -y \
-    openjdk-17-jdk \
+RUN apt-get update --fix-missing && apt-get install -y --no-install-recommends \
+    openjdk-17-jdk-headless \
     g++ \
-    build-essential \
+    make \
     python3 \
     && rm -rf /var/lib/apt/lists/*
 
