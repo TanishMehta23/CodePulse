@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 
 import logo from "../assets/logo.png";
+import logoLight from "../assets/logo-light.png";
 
 const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
   const navigate = useNavigate();
@@ -79,7 +80,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
       {sidebarOpen && (
         <div
           onClick={closeSidebar}
-          className="fixed inset-0 z-[80] bg-black/60 backdrop-blur-[2px]"
+          className="fixed inset-0 z-[80] bg-black/50 backdrop-blur-[2px]"
         />
       )}
 
@@ -88,15 +89,17 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
         className={`
           fixed left-0 top-0 z-[100]
           flex h-screen w-[300px] flex-col
-          border-r border-zinc-800
-          bg-[#0b0b0d]
+          border-r border-zinc-200
+          bg-white text-zinc-900
           shadow-2xl
           transition-transform duration-300 ease-out
+          dark:border-zinc-800
+          dark:bg-[#0b0b0d] dark:text-white
           ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
         `}
       >
         {/* Header */}
-        <div className="flex h-[74px] items-center justify-between border-b border-zinc-800 px-5">
+        <div className="flex h-[74px] items-center justify-between border-b border-zinc-200 px-5 dark:border-zinc-800">
           <Link
             to="/"
             onClick={closeSidebar}
@@ -105,17 +108,22 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
             <img
               src={logo}
               alt="CodePulse"
-              className="h-8 w-8 object-contain"
+              className="hidden h-8 w-8 object-contain dark:block"
+            />
+            <img
+              src={logoLight}
+              alt="CodePulse"
+              className="block h-8 w-8 object-contain dark:hidden"
             />
 
-            <span className="text-xl font-bold tracking-tight text-white">
+            <span className="text-xl font-bold tracking-tight text-zinc-900 dark:text-white">
               Code<span className="text-orange-500">Pulse</span>
             </span>
           </Link>
 
           <button
             onClick={closeSidebar}
-            className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg text-zinc-500 transition hover:bg-zinc-900 hover:text-white"
+            className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-900 dark:hover:bg-zinc-900 dark:hover:text-white"
             aria-label="Close sidebar"
           >
             <X size={20} />
@@ -126,14 +134,14 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
         {user ? (
           <>
             {/* User */}
-            <div className="border-b border-zinc-800 px-5 py-5">
+            <div className="border-b border-zinc-200 px-5 py-5 dark:border-zinc-800">
               <div className="flex items-center gap-3">
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-orange-500/40 bg-orange-500/10 text-lg font-semibold text-orange-400">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-orange-500/40 bg-orange-500/10 text-lg font-semibold text-orange-500 dark:text-orange-400">
                   {user.name?.charAt(0).toUpperCase() || "U"}
                 </div>
 
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-semibold text-white">
+                  <p className="truncate text-sm font-semibold text-zinc-900 dark:text-white">
                     {user.name || "User"}
                   </p>
 
@@ -149,7 +157,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
               {/* Compiler */}
               <button
                 onClick={closeSidebar}
-                className="flex w-full cursor-pointer items-center gap-3 rounded-lg bg-orange-500/10 px-4 py-3 text-left text-sm font-medium text-orange-400 transition hover:bg-orange-500/15"
+                className="flex w-full cursor-pointer items-center gap-3 rounded-lg bg-orange-500/10 px-4 py-3 text-left text-sm font-medium text-orange-600 transition hover:bg-orange-500/15 dark:text-orange-400"
               >
                 <Monitor size={18} />
 
@@ -160,13 +168,13 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
               <Link
                 to="/history"
                 onClick={closeSidebar}
-                className="mt-1 flex items-center gap-3 rounded-lg px-4 py-3 text-sm text-zinc-400 transition hover:bg-zinc-900 hover:text-white"
+                className="mt-1 flex items-center gap-3 rounded-lg px-4 py-3 text-sm text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-white"
               >
                 <History size={18} />
 
                 <span className="flex-1">Run History</span>
 
-                <span className="rounded-full bg-zinc-800 px-2 py-0.5 text-[10px] text-zinc-400">
+                <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-[10px] text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400">
                   10
                 </span>
               </Link>
@@ -175,23 +183,23 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
               <Link
                 to="/favorites"
                 onClick={closeSidebar}
-                className="mt-1 flex items-center gap-3 rounded-lg px-4 py-3 text-sm text-zinc-400 transition hover:bg-zinc-900 hover:text-white"
+                className="mt-1 flex items-center gap-3 rounded-lg px-4 py-3 text-sm text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-white"
               >
                 <Star size={18} />
 
                 <span className="flex-1">Favorites</span>
 
-                <span className="rounded-full bg-zinc-800 px-2 py-0.5 text-[10px] text-zinc-400">
+                <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-[10px] text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400">
                   5
                 </span>
               </Link>
             </nav>
 
             {/* Bottom */}
-            <div className="border-t border-zinc-800 p-3">
+            <div className="border-t border-zinc-200 p-3 dark:border-zinc-800">
               <button
                 onClick={handleLogout}
-                className="flex w-full cursor-pointer items-center gap-3 rounded-lg px-4 py-3 text-sm text-zinc-400 transition hover:bg-red-500/10 hover:text-red-400"
+                className="flex w-full cursor-pointer items-center gap-3 rounded-lg px-4 py-3 text-sm text-zinc-600 transition hover:bg-red-500/10 hover:text-red-500 dark:text-zinc-400 dark:hover:text-red-400"
               >
                 <LogOut size={18} />
 
@@ -205,27 +213,27 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
             {/* Blurred menu */}
             <div className="pointer-events-none flex-1 select-none blur-[5px]">
               <nav className="px-3 py-5">
-                <div className="flex items-center gap-3 rounded-lg bg-zinc-900 px-4 py-3 text-sm text-zinc-300">
+                <div className="flex items-center gap-3 rounded-lg bg-zinc-100 px-4 py-3 text-sm text-zinc-700 dark:bg-zinc-900 dark:text-zinc-300">
                   <Monitor size={18} />
                   Compiler
                 </div>
 
-                <div className="mt-1 flex items-center gap-3 rounded-lg px-4 py-3 text-sm text-zinc-500">
+                <div className="mt-1 flex items-center gap-3 rounded-lg px-4 py-3 text-sm text-zinc-400 dark:text-zinc-500">
                   <History size={18} />
 
                   <span className="flex-1">Run History</span>
 
-                  <span className="rounded-full bg-zinc-800 px-2 py-0.5 text-[10px]">
+                  <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-[10px] dark:bg-zinc-800">
                     10
                   </span>
                 </div>
 
-                <div className="mt-1 flex items-center gap-3 rounded-lg px-4 py-3 text-sm text-zinc-500">
+                <div className="mt-1 flex items-center gap-3 rounded-lg px-4 py-3 text-sm text-zinc-400 dark:text-zinc-500">
                   <Star size={18} />
 
                   <span className="flex-1">Favorites</span>
 
-                  <span className="rounded-full bg-zinc-800 px-2 py-0.5 text-[10px]">
+                  <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-[10px] dark:bg-zinc-800">
                     0/5
                   </span>
                 </div>
@@ -234,13 +242,13 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
 
             {/* Login Card */}
             <div className="absolute inset-x-4 bottom-8">
-              <div className="rounded-2xl border border-zinc-800 bg-[#111113]/95 p-5 text-center shadow-2xl backdrop-blur-xl">
+              <div className="rounded-2xl border border-zinc-200 bg-white/95 p-5 text-center shadow-2xl backdrop-blur-xl dark:border-zinc-800 dark:bg-[#111113]/95">
                 {/* Lock */}
-                <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full border border-orange-500/20 bg-orange-500/10 text-orange-400">
+                <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full border border-orange-500/20 bg-orange-500/10 text-orange-500 dark:text-orange-400">
                   <Lock size={21} />
                 </div>
 
-                <h3 className="text-base font-semibold text-white">
+                <h3 className="text-base font-semibold text-zinc-900 dark:text-white">
                   Sign in to unlock
                 </h3>
 
@@ -259,12 +267,12 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
                 {/* Sign Up */}
                 <button
                   onClick={handleSignup}
-                  className="mt-2 w-full cursor-pointer rounded-lg border border-zinc-800 bg-zinc-900 px-4 py-2.5 text-sm font-medium text-zinc-300 transition hover:border-zinc-700 hover:bg-zinc-800 hover:text-white"
+                  className="mt-2 w-full cursor-pointer rounded-lg border border-zinc-200 bg-zinc-50 px-4 py-2.5 text-sm font-medium text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-100 hover:text-zinc-900 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:border-zinc-700 dark:hover:bg-zinc-800 dark:hover:text-white"
                 >
                   Create Account
                 </button>
 
-                <p className="mt-4 text-center text-[11px] text-zinc-600">
+                <p className="mt-4 text-center text-[11px] text-zinc-400 dark:text-zinc-600">
                   Your compiler remains free to use without an account.
                 </p>
               </div>

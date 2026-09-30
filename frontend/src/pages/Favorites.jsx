@@ -164,12 +164,12 @@ const Favorites = () => {
 
   if (!token) {
     return (
-      <main className="min-h-screen bg-zinc-950 text-white">
-        <header className="border-b border-zinc-800/80 bg-[#09090b]">
+      <main className="min-h-screen bg-zinc-50 text-zinc-900 transition-colors duration-300 dark:bg-zinc-950 dark:text-white">
+        <header className="border-b border-zinc-200 bg-white/95 backdrop-blur-md transition-colors duration-300 dark:border-zinc-800/80 dark:bg-[#09090b]">
           <div className="mx-auto flex h-[74px] max-w-[1400px] items-center px-6">
             <Link
               to="/compiler"
-              className="flex items-center gap-2 text-sm text-zinc-400 transition hover:text-white"
+              className="flex items-center gap-2 text-sm text-zinc-600 transition hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
             >
               <ArrowLeft size={18} />
               Back to Compiler
@@ -178,21 +178,20 @@ const Favorites = () => {
         </header>
 
         <div className="mx-auto flex min-h-[calc(100vh-74px)] max-w-[900px] items-center justify-center px-6">
-          <div className="w-full rounded-2xl border border-zinc-800 bg-zinc-900/40 p-10 text-center">
+          <div className="w-full rounded-2xl border border-zinc-200 bg-white p-10 text-center shadow-xs dark:border-zinc-800 dark:bg-zinc-900/40">
             <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-orange-500/20 bg-orange-500/10">
               <Star
                 size={26}
-                className="text-orange-400"
+                className="text-orange-500 dark:text-orange-400"
               />
             </div>
 
-            <h1 className="mt-5 text-xl font-semibold">
+            <h1 className="mt-5 text-xl font-semibold text-zinc-900 dark:text-white">
               Sign in to view favorites
             </h1>
 
-            <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-zinc-500">
-              Sign in to save code snippets and access them from
-              anywhere.
+            <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-zinc-500 dark:text-zinc-400">
+              Sign in to save code snippets and access them from anywhere.
             </p>
 
             <Link
@@ -212,22 +211,22 @@ const Favorites = () => {
   // =========================
 
   return (
-    <main className="min-h-screen bg-zinc-950 text-white">
+    <main className="min-h-screen bg-zinc-50 text-zinc-900 transition-colors duration-300 dark:bg-zinc-950 dark:text-white">
 
       {/* Header */}
-      <header className="sticky top-0 z-40 border-b border-zinc-800/80 bg-[#09090b]/95 backdrop-blur-md">
+      <header className="sticky top-0 z-40 border-b border-zinc-200 bg-white/95 backdrop-blur-md transition-colors duration-300 dark:border-zinc-800/80 dark:bg-[#09090b]/95">
         <div className="mx-auto flex h-[74px] w-full max-w-[1500px] items-center justify-between px-6 lg:px-8">
 
           <Link
             to="/compiler"
-            className="flex items-center gap-2 text-sm text-zinc-400 transition hover:text-white"
+            className="flex items-center gap-2 text-sm text-zinc-600 transition hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
           >
             <ArrowLeft size={18} />
             <span>Back to Compiler</span>
           </Link>
 
           <div className="flex items-center gap-2 text-sm text-zinc-500">
-            <span className="font-medium text-zinc-300">
+            <span className="font-medium text-zinc-800 dark:text-zinc-300">
               {favorites.length}
             </span>
             <span>/ 5 favorites</span>
@@ -245,28 +244,28 @@ const Favorites = () => {
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-orange-500/20 bg-orange-500/10">
               <Star
                 size={23}
-                className="fill-orange-500/10 text-orange-400"
+                className="fill-orange-500/10 text-orange-500 dark:text-orange-400"
               />
             </div>
 
             <div>
-              <h1 className="text-2xl font-bold tracking-tight">
+              <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-white">
                 Favorites
               </h1>
 
-              <p className="mt-1 text-sm text-zinc-500">
+              <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
                 Your saved code snippets
               </p>
             </div>
           </div>
 
           {/* Counter */}
-          <div className="inline-flex w-fit items-center rounded-lg border border-zinc-800 bg-zinc-900/50 px-4 py-2 text-sm">
-            <span className="font-medium text-zinc-200">
+          <div className="inline-flex w-fit items-center rounded-lg border border-zinc-200 bg-white px-4 py-2 text-sm shadow-xs dark:border-zinc-800 dark:bg-zinc-900/50">
+            <span className="font-medium text-zinc-800 dark:text-zinc-200">
               {favorites.length}
             </span>
 
-            <span className="mx-1 text-zinc-600">
+            <span className="mx-1 text-zinc-400 dark:text-zinc-600">
               /
             </span>
 
@@ -278,7 +277,7 @@ const Favorites = () => {
 
         {/* Loading */}
         {loading && (
-          <div className="flex min-h-[400px] items-center justify-center rounded-2xl border border-zinc-800 bg-zinc-900/20">
+          <div className="flex min-h-[400px] items-center justify-center rounded-2xl border border-zinc-200 bg-white shadow-xs dark:border-zinc-800 dark:bg-zinc-900/20">
             <div className="flex items-center gap-3 text-sm text-zinc-500">
               <Loader2
                 size={20}
@@ -291,16 +290,16 @@ const Favorites = () => {
 
         {/* Empty */}
         {!loading && favorites.length === 0 && (
-          <div className="flex min-h-[380px] flex-col items-center justify-center rounded-2xl border border-zinc-800 bg-zinc-900/20 px-6 text-center">
+          <div className="flex min-h-[380px] flex-col items-center justify-center rounded-2xl border border-zinc-200 bg-white px-6 text-center shadow-xs dark:border-zinc-800 dark:bg-zinc-900/20">
 
-            <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-zinc-800 bg-zinc-900">
+            <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-zinc-200 bg-zinc-100 dark:border-zinc-800 dark:bg-zinc-900">
               <Star
                 size={29}
-                className="text-zinc-600"
+                className="text-zinc-400 dark:text-zinc-600"
               />
             </div>
 
-            <h2 className="mt-5 text-lg font-semibold text-zinc-200">
+            <h2 className="mt-5 text-lg font-semibold text-zinc-800 dark:text-zinc-200">
               No favorites yet
             </h2>
 
@@ -326,27 +325,27 @@ const Favorites = () => {
             {favorites.map((favorite, index) => (
               <article
                 key={favorite.id}
-                className="group overflow-hidden rounded-2xl border border-zinc-800 bg-[#0d0d0f] transition hover:border-zinc-700"
+                className="group overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-xs transition hover:border-zinc-300 dark:border-zinc-800 dark:bg-[#0d0d0f] dark:hover:border-zinc-700"
               >
 
                 {/* Card Header */}
-                <div className="flex items-center justify-between border-b border-zinc-800 px-5 py-4">
+                <div className="flex items-center justify-between border-b border-zinc-200 px-5 py-4 dark:border-zinc-800">
 
                   <div className="flex items-center gap-3">
 
                     <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-orange-500/20 bg-orange-500/10">
                       <Code2
                         size={17}
-                        className="text-orange-400"
+                        className="text-orange-500 dark:text-orange-400"
                       />
                     </div>
 
                     <div>
-                      <p className="text-sm font-semibold text-zinc-200">
+                      <p className="text-sm font-semibold text-zinc-800 dark:text-zinc-200">
                         {getLanguageLabel(favorite.language)}
                       </p>
 
-                      <div className="mt-0.5 flex items-center gap-1.5 text-[11px] text-zinc-600">
+                      <div className="mt-0.5 flex items-center gap-1.5 text-[11px] text-zinc-500 dark:text-zinc-600">
                         <Clock3 size={11} />
                         {formatDate(favorite.createdAt)}
                       </div>
@@ -354,7 +353,7 @@ const Favorites = () => {
 
                   </div>
 
-                  <span className="rounded-full border border-zinc-800 bg-zinc-900 px-2.5 py-1 text-[10px] font-medium text-zinc-500">
+                  <span className="rounded-full border border-zinc-200 bg-zinc-100 px-2.5 py-1 text-[10px] font-medium text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-500">
                     #{index + 1}
                   </span>
                 </div>
@@ -362,7 +361,7 @@ const Favorites = () => {
                 {/* Code */}
                 <div className="relative">
 
-                  <pre className="h-[230px] overflow-auto whitespace-pre-wrap bg-[#111113] p-5 font-mono text-[12px] leading-5 text-zinc-400">
+                  <pre className="h-[230px] overflow-auto whitespace-pre-wrap bg-zinc-50 p-5 font-mono text-[12px] leading-5 text-zinc-800 dark:bg-[#111113] dark:text-zinc-300">
                     {favorite.code}
                   </pre>
 
@@ -374,13 +373,13 @@ const Favorites = () => {
                         favorite.code
                       )
                     }
-                    className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-lg border border-zinc-700 bg-zinc-900/90 text-zinc-500 opacity-0 backdrop-blur transition group-hover:opacity-100 hover:border-zinc-600 hover:text-white"
+                    className="absolute right-3 top-3 flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border border-zinc-200 bg-white/90 text-zinc-500 opacity-0 shadow-xs backdrop-blur transition group-hover:opacity-100 hover:border-zinc-300 hover:text-zinc-900 dark:border-zinc-700 dark:bg-zinc-900/90 dark:text-zinc-500 dark:hover:border-zinc-600 dark:hover:text-white"
                     title="Copy code"
                   >
                     {copied === favorite.id ? (
                       <Check
                         size={15}
-                        className="text-green-400"
+                        className="text-emerald-500"
                       />
                     ) : (
                       <Copy size={15} />
@@ -390,25 +389,25 @@ const Favorites = () => {
 
                 {/* Input */}
                 {favorite.input && (
-                  <div className="border-t border-zinc-800 px-5 py-3">
-                    <p className="mb-1 text-[10px] font-medium uppercase tracking-wider text-zinc-600">
+                  <div className="border-t border-zinc-200 px-5 py-3 dark:border-zinc-800">
+                    <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-500">
                       Input
                     </p>
 
-                    <pre className="max-h-16 overflow-auto whitespace-pre-wrap font-mono text-xs text-zinc-500">
+                    <pre className="max-h-16 overflow-auto whitespace-pre-wrap font-mono text-xs text-zinc-600 dark:text-zinc-400">
                       {favorite.input}
                     </pre>
                   </div>
                 )}
 
                 {/* Actions */}
-                <div className="flex items-center gap-2 border-t border-zinc-800 p-3">
+                <div className="flex items-center gap-2 border-t border-zinc-200 p-3 dark:border-zinc-800">
 
                   <button
                     onClick={() =>
                       openInCompiler(favorite)
                     }
-                    className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-orange-500 px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-orange-600"
+                    className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg bg-orange-500 px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-orange-600"
                   >
                     <Play
                       size={14}
@@ -422,7 +421,7 @@ const Favorites = () => {
                       deleteFavorite(favorite.id)
                     }
                     disabled={deleting === favorite.id}
-                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-zinc-800 text-zinc-500 transition hover:border-red-500/30 hover:bg-red-500/10 hover:text-red-400 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-lg border border-zinc-200 text-zinc-400 transition hover:border-red-500/30 hover:bg-red-500/10 hover:text-red-500 dark:border-zinc-800 dark:text-zinc-500 dark:hover:text-red-400 disabled:cursor-not-allowed disabled:opacity-50"
                     title="Remove favorite"
                   >
                     {deleting === favorite.id ? (
