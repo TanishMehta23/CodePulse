@@ -12,9 +12,28 @@ const router = express.Router();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Explicit PATH ensures javac / g++ / python3 are found on cloud hosts
+// (exec() does NOT inherit the full login-shell PATH in many environments)
+const JAVA_HOME = process.env.JAVA_HOME || "/usr/lib/jvm/java-17-openjdk-amd64";
+const EXEC_ENV = {
+    PATH: [
+        `${JAVA_HOME}/bin`,
+        "/usr/local/sbin",
+        "/usr/local/bin",
+        "/usr/sbin",
+        "/usr/bin",
+        "/sbin",
+        "/bin",
+        process.env.PATH || "",
+    ]
+        .filter(Boolean)
+        .join(":"),
+};
+
 const EXEC_OPTIONS = {
     timeout: 5000,
     maxBuffer: 1024 * 1024, // 1 MB
+    env: { ...process.env, ...EXEC_ENV },
 };
 
 // =====================================================
@@ -87,6 +106,7 @@ router.post("/", authMiddleware, async (req, res) => {
         timeout: 8000,
         maxBuffer: 2 * 1024 * 1024,
         cwd: runDir,
+        env: { ...process.env, ...EXEC_ENV },
     };
 
     const cleanup = () => {
