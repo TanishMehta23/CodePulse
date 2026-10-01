@@ -1,7 +1,7 @@
 import express from "express";
 import fs from "fs";
 import path from "path";
-import { exec } from "child_process";
+import { exec, execSync } from "child_process";
 import { fileURLToPath } from "url";
 
 import authMiddleware from "../middleware/authMiddleware.js";
@@ -12,12 +12,36 @@ const router = express.Router();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Explicit PATH ensures javac / g++ / python3 are found on cloud hosts
-// (exec() does NOT inherit the full login-shell PATH in many environments)
-const JAVA_HOME = process.env.JAVA_HOME || "/usr/lib/jvm/java-17-openjdk-amd64";
+// Dynamically resolve the Java bin dir at startup — works on amd64 AND arm64
+const resolveJavaBin = () => {
+    // 1. JAVA_HOME explicitly set by platform/Dockerfile env
+    if (process.env.JAVA_HOME) return `${process.env.JAVA_HOME}/bin`;
+
+    // 2. Find javac via `which` (fastest, most reliable)
+    try {
+        const javacPath = execSync("which javac", { encoding: "utf-8" }).trim();
+        if (javacPath) return path.dirname(fs.realpathSync(javacPath));
+    } catch (_) {}
+
+    // 3. Fallback: check common JDK bin dirs (amd64 + arm64 + generic)
+    const candidates = [
+        "/usr/lib/jvm/java-17-openjdk-amd64/bin",
+        "/usr/lib/jvm/java-17-openjdk-arm64/bin",
+        "/usr/lib/jvm/java-17/bin",
+        "/usr/lib/jvm/default-java/bin",
+    ];
+    for (const c of candidates) {
+        try { if (fs.existsSync(c)) return c; } catch (_) {}
+    }
+    return "";
+};
+
+const JAVA_BIN = resolveJavaBin();
+console.log("[startup] JAVA_BIN resolved to:", JAVA_BIN || "(not found)");
+
 const EXEC_ENV = {
     PATH: [
-        `${JAVA_HOME}/bin`,
+        JAVA_BIN,
         "/usr/local/sbin",
         "/usr/local/bin",
         "/usr/sbin",

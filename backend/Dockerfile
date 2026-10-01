@@ -1,16 +1,19 @@
 FROM node:20-bookworm-slim
 
-# Install OpenJDK (Java 17), GCC / G++ (C++), and Python 3
-RUN apt-get update --fix-missing && apt-get install -y --no-install-recommends \
+# Install Java 17 (full JDK), complete C/C++ toolchain, Python 3
+# Note: No --no-install-recommends so gcc/g++ deps are fully satisfied
+RUN apt-get update && apt-get install -y \
     openjdk-17-jdk-headless \
-    g++ \
-    make \
+    build-essential \
     python3 \
     && rm -rf /var/lib/apt/lists/*
 
-# Set JAVA_HOME so child_process.exec() can resolve javac / java
-ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
-ENV PATH="${JAVA_HOME}/bin:${PATH}"
+# Detect JAVA_HOME dynamically — works on both amd64 AND arm64 hosts
+RUN JAVA_BIN=$(dirname $(readlink -f $(which javac))) && \
+    echo "JAVA_HOME=$(dirname $JAVA_BIN)" >> /etc/environment
+
+# Make javac / java / g++ / python3 available to child_process.exec()
+ENV PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 
 WORKDIR /app
 
