@@ -3,8 +3,8 @@ import fs from "fs";
 import path from "path";
 import { exec, execSync } from "child_process";
 import { fileURLToPath } from "url";
+import jwt from "jsonwebtoken";
 
-import authMiddleware from "../middleware/authMiddleware.js";
 import prisma from "../prismaClient.js";
 
 const router = express.Router();
@@ -91,10 +91,30 @@ const saveHistory = async ({
 };
 
 // =====================================================
+// OPTIONAL AUTH — guests can compile, logged-in users get history
+// =====================================================
+
+const optionalAuth = (req, res, next) => {
+    try {
+        const authHeader = req.headers.authorization;
+        if (authHeader && authHeader.startsWith("Bearer ")) {
+            const token = authHeader.split(" ")[1];
+            const decoded = jwt.verify(token, process.env.JWT_SECRET);
+            req.userId = decoded.userId;
+        } else {
+            req.userId = null; // guest — no token sent
+        }
+    } catch (_) {
+        req.userId = null; // expired / invalid token → treat as guest
+    }
+    next();
+};
+
+// =====================================================
 // COMPILE / RUN
 // =====================================================
 
-router.post("/", authMiddleware, async (req, res) => {
+router.post("/", optionalAuth, async (req, res) => {
     const { language, code, input = "" } = req.body;
 
     const userId = req.userId;
@@ -144,14 +164,10 @@ router.post("/", authMiddleware, async (req, res) => {
     // Helper to send response and cleanup
     const finish = ({ output, type, status }) => {
         cleanup();
-        saveHistory({
-            userId,
-            language,
-            code,
-            input,
-            output,
-            status,
-        });
+        // Only save history for logged-in users
+        if (userId) {
+            saveHistory({ userId, language, code, input, output, status });
+        }
         return res.json({ output, type });
     };
 

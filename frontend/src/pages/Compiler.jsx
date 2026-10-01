@@ -117,10 +117,7 @@ public class Main {
 
       const response = await fetch(`${API_BASE_URL}/api/compile`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
+        headers,
         body: JSON.stringify({
           language,
           code,
