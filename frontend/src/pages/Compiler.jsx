@@ -77,6 +77,9 @@ int main() {
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
+  // Always points to the latest runCode — fixes stale closure in Monaco editor action
+  const runCodeRef = useRef(null);
+
   const runCode = async () => {
     if (loading) return;
 
@@ -139,6 +142,9 @@ int main() {
     }
   };
 
+  // Keep ref in sync on every render
+  runCodeRef.current = runCode;
+
   // Ctrl + Enter / Cmd + Enter
   const handleEditorMount = (editor, monaco) => {
     editor.addAction({
@@ -146,7 +152,8 @@ int main() {
       label: "Run Code",
       keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter],
       run: () => {
-        runCode();
+        // Call via ref so we always get the latest code/input/language state
+        runCodeRef.current?.();
       },
     });
   };
