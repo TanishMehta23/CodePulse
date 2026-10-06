@@ -4,6 +4,7 @@ import path from "path";
 import { exec, execSync } from "child_process";
 import { fileURLToPath } from "url";
 import jwt from "jsonwebtoken";
+import rateLimit from "express-rate-limit";
 
 import prisma from "../prismaClient.js";
 
@@ -114,7 +115,19 @@ const optionalAuth = (req, res, next) => {
 // COMPILE / RUN
 // =====================================================
 
-router.post("/", optionalAuth, async (req, res) => {
+// 15 compile requests per minute per IP
+const compileLimiter = rateLimit({
+    windowMs: 60 * 1000,
+    max: 15,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: {
+        output: "Too many requests. Please wait a moment before running again.",
+        type: "error",
+    },
+});
+
+router.post("/", compileLimiter, optionalAuth, async (req, res) => {
     const { language, code, input = "" } = req.body;
 
     const userId = req.userId;
@@ -188,7 +201,7 @@ router.post("/", optionalAuth, async (req, res) => {
                 });
             }
 
-            const child = exec("java -Xmx256m Main", runOptions, (runErr, runStdout, runStderr) => {
+            const child = exec("java -client -XX:TieredStopAtLevel=1 -XX:+UseSerialGC -Xmx256m Main", runOptions, (runErr, runStdout, runStderr) => {
                 if (runErr) {
                     let runOutput;
                     if (runErr.killed) {

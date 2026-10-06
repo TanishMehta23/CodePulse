@@ -43,11 +43,9 @@ const Compiler = () => {
   };
 
   const boilerplates = {
-    java: `import java.util.*;
-
-public class Main {
+    java: `public class Main {
     public static void main(String[] args) {
-
+        System.out.println("Hello, World!");
     }
 }`,
 
@@ -55,43 +53,24 @@ public class Main {
 using namespace std;
 
 int main() {
-
+    cout << "Hello, World!" << endl;
     return 0;
 }`,
 
-    python: `def main():
+    python: `print("Hello, World!")`,
 
-    pass
-
-
-if __name__ == "__main__":
-    main()`,
-
-    javascript: `const fs = require("fs");
-
-function main() {
-
-}
-
-main();`,
+    javascript: `console.log("Hello, World!");`,
   };
 
   const [language, setLanguage] = useState("java");
 
-  const [code, setCode] = useState(`import java.util.*;
-
-public class Main {
+  const [code, setCode] = useState(`public class Main {
     public static void main(String[] args) {
-        Scanner sc = new Scanner(System.in);
-
-        int a = sc.nextInt();
-        int b = sc.nextInt();
-
-        System.out.println(a + b);
+        System.out.println("Hello, World!");
     }
 }`);
 
-  const [input, setInput] = useState("1\n2");
+  const [input, setInput] = useState("");
   const [output, setOutput] = useState("");
   const [loading, setLoading] = useState(false);
 
