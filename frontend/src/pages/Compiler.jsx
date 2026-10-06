@@ -73,12 +73,14 @@ int main() {
   const [input, setInput] = useState("");
   const [output, setOutput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [isStale, setIsStale] = useState(false);
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const runCode = async () => {
     if (loading) return;
 
+    setIsStale(false);
     setLoading(true);
     setOutput("Running...");
 
@@ -347,7 +349,10 @@ int main() {
                 height="100%"
                 language={language === "cpp" ? "cpp" : language}
                 value={code}
-                onChange={(value) => setCode(value || "")}
+                onChange={(value) => {
+                setCode(value || "");
+                if (output && output !== "Running...") setIsStale(true);
+              }}
                 onMount={handleEditorMount}
                 theme={isDark ? "vs-dark" : "light"}
                 options={{
@@ -385,7 +390,10 @@ int main() {
 
               <textarea
                 value={input}
-                onChange={(e) => setInput(e.target.value)}
+                onChange={(e) => {
+                  setInput(e.target.value);
+                  if (output && output !== "Running...") setIsStale(true);
+                }}
                 className="min-h-0 flex-1 resize-none rounded-xl border border-zinc-200 bg-white p-5 font-mono text-sm leading-6 text-zinc-800 shadow-xs outline-none transition placeholder:text-zinc-400 focus:border-orange-500 dark:border-zinc-800 dark:bg-zinc-900/80 dark:text-zinc-200 dark:placeholder:text-zinc-600"
                 placeholder="Enter input..."
                 spellCheck="false"
@@ -397,7 +405,14 @@ int main() {
               <div className="mb-3 flex items-center justify-between">
                 <h2 className="text-sm font-medium text-zinc-600 dark:text-zinc-400">Output</h2>
 
-                <span className="text-xs text-zinc-500 dark:text-zinc-600">stdout</span>
+                <div className="flex items-center gap-2">
+                  {isStale && output && output !== "Running..." && (
+                    <span className="rounded-md bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-500">
+                      Outdated
+                    </span>
+                  )}
+                  <span className="text-xs text-zinc-500 dark:text-zinc-600">stdout</span>
+                </div>
               </div>
 
               <div className="min-h-0 flex-1 overflow-auto whitespace-pre-wrap rounded-xl border border-zinc-200 bg-white p-5 font-mono text-sm leading-6 text-zinc-800 shadow-xs dark:border-zinc-800 dark:bg-zinc-900/80 dark:text-zinc-300">
